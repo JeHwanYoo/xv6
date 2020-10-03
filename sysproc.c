@@ -7,97 +7,95 @@
 #include "mmu.h"
 #include "proc.h"
 
-int
+	int
 sys_fork(void)
 {
-  return fork();
+	return fork();
 }
 
-int
+	int
 sys_exit(void)
 {
-  exit();
-  return 0;  // not reached
+	exit();
+	return 0;  // not reached
 }
 
-int
+	int
 sys_wait(void)
 {
-  return wait();
+	return wait();
 }
 
-int
+	int
 sys_kill(void)
 {
-  int pid;
+	int pid;
 
-  if(argint(0, &pid) < 0)
-    return -1;
-  return kill(pid);
+	if(argint(0, &pid) < 0)
+		return -1;
+	return kill(pid);
 }
 
-int
+	int
 sys_getpid(void)
 {
-  return myproc()->pid;
+	return myproc()->pid;
 }
 
-int
+	int
 sys_sbrk(void)
 {
-  int addr;
-  int n;
+	int addr;
+	int n;
 
-  if(argint(0, &n) < 0)
-    return -1;
-  addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
-  return addr;
+	if(argint(0, &n) < 0)
+		return -1;
+	addr = myproc()->sz;
+	if(growproc(n) < 0)
+		return -1;
+	return addr;
 }
 
-int
+	int
 sys_sleep(void)
 {
-  int n;
-  uint ticks0;
+	int n;
+	uint ticks0;
 
-  if(argint(0, &n) < 0)
-    return -1;
-  acquire(&tickslock);
-  ticks0 = ticks;
-  while(ticks - ticks0 < n){
-    if(myproc()->killed){
-      release(&tickslock);
-      return -1;
-    }
-    sleep(&ticks, &tickslock);
-  }
-  release(&tickslock);
-  return 0;
+	if(argint(0, &n) < 0)
+		return -1;
+	acquire(&tickslock);
+	ticks0 = ticks;
+	while(ticks - ticks0 < n){
+		if(myproc()->killed){
+			release(&tickslock);
+			return -1;
+		}
+		sleep(&ticks, &tickslock);
+	}
+	release(&tickslock);
+	return 0;
 }
 
 // return how many clock tick interrupts have occurred
 // since start.
-int
+	int
 sys_uptime(void)
 {
-  uint xticks;
+	uint xticks;
 
-  acquire(&tickslock);
-  xticks = ticks;
-  release(&tickslock);
-  return xticks;
+	acquire(&tickslock);
+	xticks = ticks;
+	release(&tickslock);
+	return xticks;
 }
 
-// hello
 int
 sys_hello(void) {
 	cprintf("helloxv6\n");
 	return 0;
 }
 
-// hello_name
 int
 sys_hello_name(void) {
 	char *name = 0;
@@ -105,5 +103,53 @@ sys_hello_name(void) {
 		return -1;
 	}
 	cprintf("hello %s\n", name);
+	return 0;
+}
+
+int
+sys_get_num_proc(void) {
+	int *num;
+	if (argptr(0, (char **)&num, sizeof(int *)) < 0) {
+		return -1;
+	}
+	*num = proccnt();
+	return 0;
+}
+
+int
+sys_get_proc_info(void) {
+	int pid;
+	struct processInfo *info;
+	if (argint(0, &pid) < 0) {
+		return -1;
+	}
+	if (argptr(1, (char **)&info, sizeof(info)) < 0) {
+		return -1;
+	}
+	if (procinfo(pid, info) < 0) {
+		return -1;
+	}
+	return 0;
+}
+
+int
+sys_get_proc_pids(void) {
+	int *pids;
+	if (argptr(0, (char **)&pids, sizeof(int *)) < 0) {
+		return -1;
+	}
+	procpids(pids);
+	return 0;
+}
+
+int
+sys_get_max_pid(void) {
+	int *pid;
+	if (argptr(0, (char **)&pid, sizeof(int *)) < 0) {
+		return -1;
+	}
+	if((*pid = maxpid()) < 0) {
+		return -1;
+	}
 	return 0;
 }

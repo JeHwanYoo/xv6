@@ -112,7 +112,11 @@ int             kill(int);
 struct cpu*     mycpu(void);
 struct proc*    myproc();
 void            pinit(void);
+int							proccnt(void); // new add
 void            procdump(void);
+int							procinfo(int, struct processInfo *); // new add
+void						procpids(int *); // new add
+int							maxpid(void); // new add
 void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
 void            setproc(struct proc*);

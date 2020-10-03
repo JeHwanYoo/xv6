@@ -5,6 +5,8 @@
 
 int main(void)
 {
-    hello();
+    if (hello() < 0) {
+			printf(2, "hello error\n");
+		}
     exit();
 }

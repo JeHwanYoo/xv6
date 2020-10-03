@@ -56,6 +56,7 @@ DIRSIZ	fs.h	/^#define DIRSIZ /;"	d
 DPL_USER	mmu.h	/^#define DPL_USER /;"	d
 Disassembly	bootblock.asm	/^Disassembly of section .text:$/;"	l
 Disassembly	cat.asm	/^Disassembly of section .text:$/;"	l
+Disassembly	clear.asm	/^Disassembly of section .text:$/;"	l
 Disassembly	echo.asm	/^Disassembly of section .text:$/;"	l
 Disassembly	entryother.asm	/^Disassembly of section .text:$/;"	l
 Disassembly	forktest.asm	/^Disassembly of section .text:$/;"	l
@@ -264,7 +265,13 @@ SYS_exec	syscall.h	/^#define SYS_exec /;"	d
 SYS_exit	syscall.h	/^#define SYS_exit /;"	d
 SYS_fork	syscall.h	/^#define SYS_fork /;"	d
 SYS_fstat	syscall.h	/^#define SYS_fstat /;"	d
+SYS_get_max_pid	syscall.h	/^#define SYS_get_max_pid	/;"	d
+SYS_get_num_proc	syscall.h	/^#define SYS_get_num_proc	/;"	d
+SYS_get_proc_info	syscall.h	/^#define SYS_get_proc_info /;"	d
+SYS_get_proc_pids	syscall.h	/^#define SYS_get_proc_pids /;"	d
 SYS_getpid	syscall.h	/^#define SYS_getpid /;"	d
+SYS_hello	syscall.h	/^#define SYS_hello /;"	d
+SYS_hello_name	syscall.h	/^#define SYS_hello_name	/;"	d
 SYS_kill	syscall.h	/^#define SYS_kill /;"	d
 SYS_link	syscall.h	/^#define SYS_link /;"	d
 SYS_mkdir	syscall.h	/^#define SYS_mkdir /;"	d
@@ -334,6 +341,7 @@ __anonf5a2dce30108	umalloc.c	/^  struct {$/;"	s	union:header	file:
 __anonfd762eb60108	file.c	/^struct {$/;"	s	file:
 __anonfd762ebb0103	file.h	/^  enum { FD_NONE, FD_PIPE, FD_INODE } type;$/;"	g	struct:file
 _cat	cat.asm	/^_cat:     file format elf32-i386$/;"	l
+_clear	clear.asm	/^_clear:     file format elf32-i386$/;"	l
 _echo	echo.asm	/^_echo:     file format elf32-i386$/;"	l
 _forktest	Makefile	/^_forktest: forktest.o $(ULIB)$/;"	t
 _forktest	forktest.asm	/^_forktest:     file format elf32-i386$/;"	l
@@ -359,10 +367,8 @@ _wc	wc.asm	/^_wc:     file format elf32-i386$/;"	l
 _zombie	zombie.asm	/^_zombie:     file format elf32-i386$/;"	l
 a	forktest.asm	/^   a:	e8 41 00 00 00       	call   50 <forktest>$/;"	l
 a	getmaxpid_test.asm	/^   a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
-a	getnumproc_test.asm	/^   a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
-a	getprocinfo_test.asm	/^   a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
-a	hello_test.asm	/^   a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
-a	helloname_test.asm	/^   a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
+a	getnumproc_test.asm	/^   a:	e8 24 03 00 00       	call   333 <get_num_proc>$/;"	l
+a	hello_test.asm	/^   a:	e8 14 03 00 00       	call   323 <hello>$/;"	l
 a	initcode.asm	/^   a:	6a 00                	push   $0x0$/;"	l
 a	kernel.asm	/^      a = PGADDR(PDX(a) + 1, 0, 0) - PGSIZE;$/;"	d
 a	kernel.asm	/^    a = (uint*)bp->data;$/;"	d
@@ -374,8 +380,13 @@ a	seqinc_prio.asm	/^   a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 a	usertests.asm	/^    a = b + 1;$/;"	d
 a	usertests.asm	/^  a = sbrk(0);$/;"	d
 a0	cat.asm	/^  a0:	83 ec 04             	sub    $0x4,%esp$/;"	l
+a0	clear.asm	/^  a0:	31 c0                	xor    %eax,%eax$/;"	l
 a0	echo.asm	/^  a0:	5b                   	pop    %ebx$/;"	l
 a0	forktest.asm	/^  a0:	e8 16 03 00 00       	call   3bb <wait>$/;"	l
+a0	getnumproc_test.asm	/^  a0:	f3 0f 1e fb          	endbr32 $/;"	l
+a0	getprocinfo_test.asm	/^  a0:	0f b6 14 03          	movzbl (%ebx,%eax,1),%edx$/;"	l
+a0	hello_test.asm	/^  a0:	f3 0f 1e fb          	endbr32 $/;"	l
+a0	helloname_test.asm	/^  a0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
 a0	kill.asm	/^  a0:	f3 0f 1e fb          	endbr32 $/;"	l
 a0	ls.asm	/^  a0:	77 4a                	ja     ec <fmtname+0x8c>$/;"	l
 a0	mkdir.asm	/^  a0:	5b                   	pop    %ebx$/;"	l
@@ -383,31 +394,27 @@ a0	rm.asm	/^  a0:	5b                   	pop    %ebx$/;"	l
 a0	wc.asm	/^  a0:	f3 0f 1e fb          	endbr32 $/;"	l
 a0	zombie.asm	/^  a0:	31 c0                	xor    %eax,%eax$/;"	l
 a00	sh.asm	/^     a00:	f3 0f 1e fb          	endbr32 $/;"	l
-a01	grep.asm	/^ a01:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a01	ls.asm	/^ a01:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a01	grep.asm	/^ a01:	50                   	push   %eax$/;"	l
+a01	ls.asm	/^ a01:	50                   	push   %eax$/;"	l
 a01	usertests.asm	/^     a01:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a02	grep.asm	/^ a02:	e8 e9 fe ff ff       	call   8f0 <free>$/;"	l
+a02	ls.asm	/^ a02:	e8 e9 fe ff ff       	call   8f0 <free>$/;"	l
 a04	sh.asm	/^     a04:	55                   	push   %ebp$/;"	l
 a05	sh.asm	/^     a05:	89 e5                	mov    %esp,%ebp$/;"	l
+a07	grep.asm	/^ a07:	a1 80 0e 00 00       	mov    0xe80,%eax$/;"	l
+a07	ls.asm	/^ a07:	a1 14 0e 00 00       	mov    0xe14,%eax$/;"	l
 a07	sh.asm	/^     a07:	53                   	push   %ebx$/;"	l
-a08	grep.asm	/^ a08:	39 ce                	cmp    %ecx,%esi$/;"	l
-a08	ls.asm	/^ a08:	39 ce                	cmp    %ecx,%esi$/;"	l
 a08	sh.asm	/^     a08:	83 ec 04             	sub    $0x4,%esp$/;"	l
 a08	usertests.asm	/^     a08:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a0a	grep.asm	/^ a0a:	74 54                	je     a60 <malloc+0x100>$/;"	l
-a0a	ls.asm	/^ a0a:	74 54                	je     a60 <malloc+0x100>$/;"	l
 a0b	sh.asm	/^     a0b:	8b 5d 08             	mov    0x8(%ebp),%ebx$/;"	l
-a0c	grep.asm	/^ a0c:	29 f1                	sub    %esi,%ecx$/;"	l
-a0c	ls.asm	/^ a0c:	29 f1                	sub    %esi,%ecx$/;"	l
-a0e	grep.asm	/^ a0e:	89 4a 04             	mov    %ecx,0x4(%edx)$/;"	l
-a0e	ls.asm	/^ a0e:	89 4a 04             	mov    %ecx,0x4(%edx)$/;"	l
+a0c	grep.asm	/^ a0c:	83 c4 10             	add    $0x10,%esp$/;"	l
+a0c	ls.asm	/^ a0c:	83 c4 10             	add    $0x10,%esp$/;"	l
 a0e	sh.asm	/^     a0e:	85 db                	test   %ebx,%ebx$/;"	l
+a0f	grep.asm	/^ a0f:	85 c0                	test   %eax,%eax$/;"	l
+a0f	ls.asm	/^ a0f:	85 c0                	test   %eax,%eax$/;"	l
 a0f	usertests.asm	/^     a0f:	90                   	nop$/;"	l
 a1	echo.asm	/^  a1:	5d                   	pop    %ebp$/;"	l
 a1	getmaxpid_test.asm	/^  a1:	75 f5                	jne    98 <strlen+0x18>$/;"	l
-a1	getnumproc_test.asm	/^  a1:	75 f5                	jne    98 <strlen+0x18>$/;"	l
-a1	getprocinfo_test.asm	/^  a1:	75 f5                	jne    98 <strlen+0x18>$/;"	l
-a1	hello_test.asm	/^  a1:	75 f5                	jne    98 <strlen+0x18>$/;"	l
-a1	helloname_test.asm	/^  a1:	75 f5                	jne    98 <strlen+0x18>$/;"	l
 a1	ln.asm	/^  a1:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 a1	mkdir.asm	/^  a1:	5d                   	pop    %ebp$/;"	l
 a1	rm.asm	/^  a1:	5d                   	pop    %ebp$/;"	l
@@ -416,86 +423,96 @@ a1	seqinc_prio.asm	/^  a1:	75 f5                	jne    98 <strlen+0x18>$/;"	l
 a1	stressfs.asm	/^  a1:	68 02 02 00 00       	push   $0x202$/;"	l
 a10	sh.asm	/^     a10:	0f 84 9a 00 00 00    	je     ab0 <nulterminate+0xb0>$/;"	l
 a10	usertests.asm	/^     a10:	f3 0f 1e fb          	endbr32 $/;"	l
-a11	grep.asm	/^ a11:	8d 14 ca             	lea    (%edx,%ecx,8),%edx$/;"	l
-a11	ls.asm	/^ a11:	8d 14 ca             	lea    (%edx,%ecx,8),%edx$/;"	l
-a14	grep.asm	/^ a14:	89 72 04             	mov    %esi,0x4(%edx)$/;"	l
-a14	ls.asm	/^ a14:	89 72 04             	mov    %esi,0x4(%edx)$/;"	l
+a11	grep.asm	/^ a11:	75 bd                	jne    9d0 <malloc+0x50>$/;"	l
+a11	ls.asm	/^ a11:	75 bd                	jne    9d0 <malloc+0x50>$/;"	l
+a13	grep.asm	/^ a13:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
+a13	ls.asm	/^ a13:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
 a14	usertests.asm	/^     a14:	55                   	push   %ebp$/;"	l
 a15	usertests.asm	/^     a15:	89 e5                	mov    %esp,%ebp$/;"	l
+a16	grep.asm	/^ a16:	31 c0                	xor    %eax,%eax$/;"	l
+a16	ls.asm	/^ a16:	31 c0                	xor    %eax,%eax$/;"	l
 a16	sh.asm	/^     a16:	83 3b 05             	cmpl   $0x5,(%ebx)$/;"	l
-a17	grep.asm	/^ a17:	a3 60 0e 00 00       	mov    %eax,0xe60$/;"	l
-a17	ls.asm	/^ a17:	a3 f4 0d 00 00       	mov    %eax,0xdf4$/;"	l
 a17	usertests.asm	/^     a17:	83 ec 10             	sub    $0x10,%esp$/;"	l
+a18	grep.asm	/^ a18:	5b                   	pop    %ebx$/;"	l
+a18	ls.asm	/^ a18:	5b                   	pop    %ebx$/;"	l
+a19	grep.asm	/^ a19:	5e                   	pop    %esi$/;"	l
+a19	ls.asm	/^ a19:	5e                   	pop    %esi$/;"	l
 a19	sh.asm	/^     a19:	77 6d                	ja     a88 <nulterminate+0x88>$/;"	l
-a1a	usertests.asm	/^     a1a:	68 64 41 00 00       	push   $0x4164$/;"	l
+a1a	grep.asm	/^ a1a:	5f                   	pop    %edi$/;"	l
+a1a	ls.asm	/^ a1a:	5f                   	pop    %edi$/;"	l
+a1a	usertests.asm	/^     a1a:	68 84 41 00 00       	push   $0x4184$/;"	l
+a1b	grep.asm	/^ a1b:	5d                   	pop    %ebp$/;"	l
+a1b	ls.asm	/^ a1b:	5d                   	pop    %ebp$/;"	l
 a1b	sh.asm	/^     a1b:	8b 03                	mov    (%ebx),%eax$/;"	l
-a1c	grep.asm	/^ a1c:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
-a1c	ls.asm	/^ a1c:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
-a1d	sh.asm	/^     a1d:	3e ff 24 85 28 13 00 	notrack jmp *0x1328(,%eax,4)$/;"	l
-a1f	grep.asm	/^ a1f:	8d 42 08             	lea    0x8(%edx),%eax$/;"	l
-a1f	ls.asm	/^ a1f:	8d 42 08             	lea    0x8(%edx),%eax$/;"	l
-a1f	usertests.asm	/^     a1f:	ff 35 e0 5e 00 00    	pushl  0x5ee0$/;"	l
+a1c	grep.asm	/^ a1c:	c3                   	ret    $/;"	l
+a1c	ls.asm	/^ a1c:	c3                   	ret    $/;"	l
+a1d	grep.asm	/^ a1d:	89 c2                	mov    %eax,%edx$/;"	l
+a1d	ls.asm	/^ a1d:	89 c2                	mov    %eax,%edx$/;"	l
+a1d	sh.asm	/^     a1d:	3e ff 24 85 48 13 00 	notrack jmp *0x1348(,%eax,4)$/;"	l
+a1f	grep.asm	/^ a1f:	89 f8                	mov    %edi,%eax$/;"	l
+a1f	ls.asm	/^ a1f:	89 f8                	mov    %edi,%eax$/;"	l
+a1f	usertests.asm	/^     a1f:	ff 35 00 5f 00 00    	pushl  0x5f00$/;"	l
+a2	clear.asm	/^  a2:	29 d8                	sub    %ebx,%eax$/;"	l
 a2	echo.asm	/^  a2:	c3                   	ret    $/;"	l
 a2	ls.asm	/^  a2:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 a2	mkdir.asm	/^  a2:	c3                   	ret    $/;"	l
 a2	rm.asm	/^  a2:	c3                   	ret    $/;"	l
 a2	sh.asm	/^      a2:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 a2	zombie.asm	/^  a2:	29 d8                	sub    %ebx,%eax$/;"	l
-a22	grep.asm	/^ a22:	5b                   	pop    %ebx$/;"	l
-a22	ls.asm	/^ a22:	5b                   	pop    %ebx$/;"	l
-a23	grep.asm	/^ a23:	5e                   	pop    %esi$/;"	l
-a23	ls.asm	/^ a23:	5e                   	pop    %esi$/;"	l
-a24	grep.asm	/^ a24:	5f                   	pop    %edi$/;"	l
-a24	ls.asm	/^ a24:	5f                   	pop    %edi$/;"	l
+a21	grep.asm	/^ a21:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a21	ls.asm	/^ a21:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a24	sh.asm	/^     a24:	00 $/;"	l
-a25	grep.asm	/^ a25:	5d                   	pop    %ebp$/;"	l
-a25	ls.asm	/^ a25:	5d                   	pop    %ebp$/;"	l
 a25	sh.asm	/^     a25:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-a25	usertests.asm	/^     a25:	e8 b6 30 00 00       	call   3ae0 <printf>$/;"	l
-a26	grep.asm	/^ a26:	c3                   	ret    $/;"	l
-a26	ls.asm	/^ a26:	c3                   	ret    $/;"	l
-a27	grep.asm	/^ a27:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a27	ls.asm	/^ a27:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a25	usertests.asm	/^     a25:	e8 d6 30 00 00       	call   3b00 <printf>$/;"	l
+a28	grep.asm	/^ a28:	39 ce                	cmp    %ecx,%esi$/;"	l
+a28	ls.asm	/^ a28:	39 ce                	cmp    %ecx,%esi$/;"	l
 a28	sh.asm	/^     a28:	83 ec 0c             	sub    $0xc,%esp$/;"	l
+a2a	grep.asm	/^ a2a:	74 54                	je     a80 <malloc+0x100>$/;"	l
+a2a	ls.asm	/^ a2a:	74 54                	je     a80 <malloc+0x100>$/;"	l
 a2a	usertests.asm	/^     a2a:	5a                   	pop    %edx$/;"	l
 a2b	sh.asm	/^     a2b:	ff 73 04             	pushl  0x4(%ebx)$/;"	l
 a2b	usertests.asm	/^     a2b:	59                   	pop    %ecx$/;"	l
-a2c	usertests.asm	/^     a2c:	68 e4 5e 00 00       	push   $0x5ee4$/;"	l
-a2e	grep.asm	/^ a2e:	66 90                	xchg   %ax,%ax$/;"	l
-a2e	ls.asm	/^ a2e:	66 90                	xchg   %ax,%ax$/;"	l
+a2c	grep.asm	/^ a2c:	29 f1                	sub    %esi,%ecx$/;"	l
+a2c	ls.asm	/^ a2c:	29 f1                	sub    %esi,%ecx$/;"	l
+a2c	usertests.asm	/^     a2c:	68 04 5f 00 00       	push   $0x5f04$/;"	l
+a2e	grep.asm	/^ a2e:	89 4a 04             	mov    %ecx,0x4(%edx)$/;"	l
+a2e	ls.asm	/^ a2e:	89 4a 04             	mov    %ecx,0x4(%edx)$/;"	l
 a2e	sh.asm	/^     a2e:	e8 cd ff ff ff       	call   a00 <nulterminate>$/;"	l
 a3	cat.asm	/^  a3:	53                   	push   %ebx$/;"	l
 a3	echo.asm	/^  a3:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a3	getmaxpid_test.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
-a3	getnumproc_test.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
-a3	getprocinfo_test.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
 a3	grep.asm	/^  a3:	52                   	push   %edx$/;"	l
-a3	hello_test.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
-a3	helloname_test.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
 a3	mkdir.asm	/^  a3:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a3	rm.asm	/^  a3:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a3	seqdec_prio.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
 a3	seqinc_prio.asm	/^  a3:	89 c8                	mov    %ecx,%eax$/;"	l
 a3	usertests.asm	/^      a3:	e8 08 04 00 00       	call   4b0 <writetest>$/;"	l
-a30	grep.asm	/^ a30:	c7 05 60 0e 00 00 64 	movl   $0xe64,0xe60$/;"	l
-a30	ls.asm	/^ a30:	c7 05 f4 0d 00 00 f8 	movl   $0xdf8,0xdf4$/;"	l
-a31	usertests.asm	/^     a31:	68 2d 3f 00 00       	push   $0x3f2d$/;"	l
+a31	grep.asm	/^ a31:	8d 14 ca             	lea    (%edx,%ecx,8),%edx$/;"	l
+a31	ls.asm	/^ a31:	8d 14 ca             	lea    (%edx,%ecx,8),%edx$/;"	l
+a31	usertests.asm	/^     a31:	68 4d 3f 00 00       	push   $0x3f4d$/;"	l
 a33	sh.asm	/^     a33:	58                   	pop    %eax$/;"	l
+a34	grep.asm	/^ a34:	89 72 04             	mov    %esi,0x4(%edx)$/;"	l
+a34	ls.asm	/^ a34:	89 72 04             	mov    %esi,0x4(%edx)$/;"	l
 a34	sh.asm	/^     a34:	ff 73 08             	pushl  0x8(%ebx)$/;"	l
 a36	usertests.asm	/^     a36:	e8 80 2f 00 00       	call   39bb <exec>$/;"	l
-a37	grep.asm	/^ a37:	0e 00 00 $/;"	l
-a37	ls.asm	/^ a37:	0d 00 00 $/;"	l
+a37	grep.asm	/^ a37:	a3 80 0e 00 00       	mov    %eax,0xe80$/;"	l
+a37	ls.asm	/^ a37:	a3 14 0e 00 00       	mov    %eax,0xe14$/;"	l
 a37	sh.asm	/^     a37:	e8 c4 ff ff ff       	call   a00 <nulterminate>$/;"	l
-a3a	grep.asm	/^ a3a:	bf 64 0e 00 00       	mov    $0xe64,%edi$/;"	l
-a3a	ls.asm	/^ a3a:	bf f8 0d 00 00       	mov    $0xdf8,%edi$/;"	l
 a3b	usertests.asm	/^     a3b:	83 c4 10             	add    $0x10,%esp$/;"	l
+a3c	grep.asm	/^ a3c:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
+a3c	ls.asm	/^ a3c:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
 a3c	sh.asm	/^     a3c:	83 c4 10             	add    $0x10,%esp$/;"	l
 a3e	usertests.asm	/^     a3e:	85 c0                	test   %eax,%eax$/;"	l
-a3f	grep.asm	/^ a3f:	c7 05 64 0e 00 00 64 	movl   $0xe64,0xe64$/;"	l
-a3f	ls.asm	/^ a3f:	c7 05 f8 0d 00 00 f8 	movl   $0xdf8,0xdf8$/;"	l
+a3f	grep.asm	/^ a3f:	8d 42 08             	lea    0x8(%edx),%eax$/;"	l
+a3f	ls.asm	/^ a3f:	8d 42 08             	lea    0x8(%edx),%eax$/;"	l
 a3f	sh.asm	/^     a3f:	89 d8                	mov    %ebx,%eax$/;"	l
-a4	cat.asm	/^  a4:	68 80 0b 00 00       	push   $0xb80$/;"	l
+a4	cat.asm	/^  a4:	68 a0 0b 00 00       	push   $0xba0$/;"	l
+a4	clear.asm	/^  a4:	5b                   	pop    %ebx$/;"	l
+a4	getnumproc_test.asm	/^  a4:	55                   	push   %ebp$/;"	l
+a4	getprocinfo_test.asm	/^  a4:	88 14 01             	mov    %dl,(%ecx,%eax,1)$/;"	l
 a4	grep.asm	/^  a4:	52                   	push   %edx$/;"	l
+a4	hello_test.asm	/^  a4:	55                   	push   %ebp$/;"	l
+a4	helloname_test.asm	/^  a4:	83 c1 01             	add    $0x1,%ecx$/;"	l
 a4	init.asm	/^  a4:	50                   	push   %eax$/;"	l
 a4	kill.asm	/^  a4:	55                   	push   %ebp$/;"	l
 a4	ln.asm	/^  a4:	84 c0                	test   %al,%al$/;"	l
@@ -503,92 +520,99 @@ a4	wc.asm	/^  a4:	55                   	push   %ebp$/;"	l
 a4	zombie.asm	/^  a4:	5b                   	pop    %ebx$/;"	l
 a40	usertests.asm	/^     a40:	78 02                	js     a44 <exectest+0x34>$/;"	l
 a41	sh.asm	/^     a41:	8b 5d fc             	mov    -0x4(%ebp),%ebx$/;"	l
+a42	grep.asm	/^ a42:	5b                   	pop    %ebx$/;"	l
+a42	ls.asm	/^ a42:	5b                   	pop    %ebx$/;"	l
 a42	usertests.asm	/^     a42:	c9                   	leave  $/;"	l
+a43	grep.asm	/^ a43:	5e                   	pop    %esi$/;"	l
+a43	ls.asm	/^ a43:	5e                   	pop    %esi$/;"	l
 a43	usertests.asm	/^     a43:	c3                   	ret    $/;"	l
+a44	grep.asm	/^ a44:	5f                   	pop    %edi$/;"	l
+a44	ls.asm	/^ a44:	5f                   	pop    %edi$/;"	l
 a44	sh.asm	/^     a44:	c9                   	leave  $/;"	l
 a44	usertests.asm	/^     a44:	50                   	push   %eax$/;"	l
+a45	grep.asm	/^ a45:	5d                   	pop    %ebp$/;"	l
+a45	ls.asm	/^ a45:	5d                   	pop    %ebp$/;"	l
 a45	sh.asm	/^     a45:	c3                   	ret    $/;"	l
 a45	usertests.asm	/^     a45:	50                   	push   %eax$/;"	l
-a46	grep.asm	/^ a46:	0e 00 00 $/;"	l
-a46	ls.asm	/^ a46:	0d 00 00 $/;"	l
+a46	grep.asm	/^ a46:	c3                   	ret    $/;"	l
+a46	ls.asm	/^ a46:	c3                   	ret    $/;"	l
 a46	sh.asm	/^     a46:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a46	usertests.asm	/^     a46:	68 6f 41 00 00       	push   $0x416f$/;"	l
-a49	grep.asm	/^ a49:	89 f8                	mov    %edi,%eax$/;"	l
-a49	ls.asm	/^ a49:	89 f8                	mov    %edi,%eax$/;"	l
-a4b	grep.asm	/^ a4b:	c7 05 68 0e 00 00 00 	movl   $0x0,0xe68$/;"	l
-a4b	ls.asm	/^ a4b:	c7 05 fc 0d 00 00 00 	movl   $0x0,0xdfc$/;"	l
-a4b	usertests.asm	/^     a4b:	ff 35 e0 5e 00 00    	pushl  0x5ee0$/;"	l
+a46	usertests.asm	/^     a46:	68 8f 41 00 00       	push   $0x418f$/;"	l
+a47	grep.asm	/^ a47:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a47	ls.asm	/^ a47:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a4b	usertests.asm	/^     a4b:	ff 35 00 5f 00 00    	pushl  0x5f00$/;"	l
 a4d	sh.asm	/^     a4d:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
+a4e	grep.asm	/^ a4e:	66 90                	xchg   %ax,%ax$/;"	l
+a4e	ls.asm	/^ a4e:	66 90                	xchg   %ax,%ax$/;"	l
+a5	clear.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
 a5	forktest.asm	/^  a5:	85 c0                	test   %eax,%eax$/;"	l
 a5	getmaxpid_test.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
-a5	getnumproc_test.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
-a5	getprocinfo_test.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
+a5	getnumproc_test.asm	/^  a5:	89 e5                	mov    %esp,%ebp$/;"	l
 a5	grep.asm	/^  a5:	6a 00                	push   $0x0$/;"	l
-a5	hello_test.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
-a5	helloname_test.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
+a5	hello_test.asm	/^  a5:	89 e5                	mov    %esp,%ebp$/;"	l
 a5	init.asm	/^  a5:	50                   	push   %eax$/;"	l
 a5	kill.asm	/^  a5:	89 e5                	mov    %esp,%ebp$/;"	l
 a5	ls.asm	/^  a5:	53                   	push   %ebx$/;"	l
 a5	seqdec_prio.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
 a5	seqinc_prio.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
-a5	sh.asm	/^      a5:	68 40 19 00 00       	push   $0x1940$/;"	l
+a5	sh.asm	/^      a5:	68 60 19 00 00       	push   $0x1960$/;"	l
 a5	wc.asm	/^  a5:	89 e5                	mov    %esp,%ebp$/;"	l
 a5	zombie.asm	/^  a5:	5d                   	pop    %ebp$/;"	l
+a50	grep.asm	/^ a50:	c7 05 80 0e 00 00 84 	movl   $0xe84,0xe80$/;"	l
+a50	ls.asm	/^ a50:	c7 05 14 0e 00 00 18 	movl   $0xe18,0xe14$/;"	l
 a50	sh.asm	/^     a50:	83 ec 0c             	sub    $0xc,%esp$/;"	l
-a51	usertests.asm	/^     a51:	e8 8a 30 00 00       	call   3ae0 <printf>$/;"	l
-a52	grep.asm	/^ a52:	00 00 00 $/;"	l
-a52	ls.asm	/^ a52:	00 00 00 $/;"	l
+a51	usertests.asm	/^     a51:	e8 aa 30 00 00       	call   3b00 <printf>$/;"	l
 a53	sh.asm	/^     a53:	ff 73 04             	pushl  0x4(%ebx)$/;"	l
-a55	grep.asm	/^ a55:	e9 36 ff ff ff       	jmp    990 <malloc+0x30>$/;"	l
-a55	ls.asm	/^ a55:	e9 36 ff ff ff       	jmp    990 <malloc+0x30>$/;"	l
 a56	sh.asm	/^     a56:	e8 a5 ff ff ff       	call   a00 <nulterminate>$/;"	l
 a56	usertests.asm	/^     a56:	e8 28 2f 00 00       	call   3983 <exit>$/;"	l
-a5a	grep.asm	/^ a5a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
-a5a	ls.asm	/^ a5a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+a57	grep.asm	/^ a57:	0e 00 00 $/;"	l
+a57	ls.asm	/^ a57:	0e 00 00 $/;"	l
+a5a	grep.asm	/^ a5a:	bf 84 0e 00 00       	mov    $0xe84,%edi$/;"	l
+a5a	ls.asm	/^ a5a:	bf 18 0e 00 00       	mov    $0xe18,%edi$/;"	l
 a5b	sh.asm	/^     a5b:	89 d8                	mov    %ebx,%eax$/;"	l
 a5b	usertests.asm	/^     a5b:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a5d	sh.asm	/^     a5d:	83 c4 10             	add    $0x10,%esp$/;"	l
+a5f	grep.asm	/^ a5f:	c7 05 84 0e 00 00 84 	movl   $0xe84,0xe84$/;"	l
+a5f	ls.asm	/^ a5f:	c7 05 18 0e 00 00 18 	movl   $0xe18,0xe18$/;"	l
 a5f	usertests.asm	/^     a5f:	90                   	nop$/;"	l
+a6	clear.asm	/^  a6:	c3                   	ret    $/;"	l
 a6	getmaxpid_test.asm	/^  a6:	c3                   	ret    $/;"	l
-a6	getnumproc_test.asm	/^  a6:	c3                   	ret    $/;"	l
-a6	getprocinfo_test.asm	/^  a6:	c3                   	ret    $/;"	l
-a6	hello_test.asm	/^  a6:	c3                   	ret    $/;"	l
-a6	helloname_test.asm	/^  a6:	c3                   	ret    $/;"	l
-a6	init.asm	/^  a6:	68 1c 0b 00 00       	push   $0xb1c$/;"	l
+a6	init.asm	/^  a6:	68 3c 0b 00 00       	push   $0xb3c$/;"	l
 a6	ln.asm	/^  a6:	75 19                	jne    c1 <strcmp+0x31>$/;"	l
 a6	ls.asm	/^  a6:	e8 15 03 00 00       	call   3c0 <strlen>$/;"	l
 a6	seqdec_prio.asm	/^  a6:	c3                   	ret    $/;"	l
 a6	seqinc_prio.asm	/^  a6:	c3                   	ret    $/;"	l
 a6	stressfs.asm	/^  a6:	50                   	push   %eax$/;"	l
 a6	zombie.asm	/^  a6:	c3                   	ret    $/;"	l
-a60	grep.asm	/^ a60:	8b 0a                	mov    (%edx),%ecx$/;"	l
-a60	ls.asm	/^ a60:	8b 0a                	mov    (%edx),%ecx$/;"	l
 a60	sh.asm	/^     a60:	8b 5d fc             	mov    -0x4(%ebp),%ebx$/;"	l
 a60	usertests.asm	/^     a60:	f3 0f 1e fb          	endbr32 $/;"	l
-a62	grep.asm	/^ a62:	89 08                	mov    %ecx,(%eax)$/;"	l
-a62	ls.asm	/^ a62:	89 08                	mov    %ecx,(%eax)$/;"	l
 a63	sh.asm	/^     a63:	c9                   	leave  $/;"	l
-a64	grep.asm	/^ a64:	eb b1                	jmp    a17 <malloc+0xb7>$/;"	l
-a64	ls.asm	/^ a64:	eb b1                	jmp    a17 <malloc+0xb7>$/;"	l
 a64	sh.asm	/^     a64:	c3                   	ret    $/;"	l
 a64	usertests.asm	/^     a64:	55                   	push   %ebp$/;"	l
 a65	sh.asm	/^     a65:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
 a65	usertests.asm	/^     a65:	89 e5                	mov    %esp,%ebp$/;"	l
+a66	grep.asm	/^ a66:	0e 00 00 $/;"	l
+a66	ls.asm	/^ a66:	0e 00 00 $/;"	l
 a67	usertests.asm	/^     a67:	57                   	push   %edi$/;"	l
 a68	sh.asm	/^     a68:	8b 4b 04             	mov    0x4(%ebx),%ecx$/;"	l
 a68	usertests.asm	/^     a68:	56                   	push   %esi$/;"	l
+a69	grep.asm	/^ a69:	89 f8                	mov    %edi,%eax$/;"	l
+a69	ls.asm	/^ a69:	89 f8                	mov    %edi,%eax$/;"	l
 a69	usertests.asm	/^     a69:	8d 45 e0             	lea    -0x20(%ebp),%eax$/;"	l
+a6b	grep.asm	/^ a6b:	c7 05 88 0e 00 00 00 	movl   $0x0,0xe88$/;"	l
+a6b	ls.asm	/^ a6b:	c7 05 1c 0e 00 00 00 	movl   $0x0,0xe1c$/;"	l
 a6b	sh.asm	/^     a6b:	8d 43 08             	lea    0x8(%ebx),%eax$/;"	l
 a6c	usertests.asm	/^     a6c:	53                   	push   %ebx$/;"	l
 a6d	usertests.asm	/^     a6d:	83 ec 38             	sub    $0x38,%esp$/;"	l
 a6e	sh.asm	/^     a6e:	85 c9                	test   %ecx,%ecx$/;"	l
+a7	clear.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a7	forktest.asm	/^  a7:	78 36                	js     df <forktest+0x8f>$/;"	l
 a7	getmaxpid_test.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a7	getnumproc_test.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a7	getprocinfo_test.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a7	getnumproc_test.asm	/^  a7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+a7	getprocinfo_test.asm	/^  a7:	83 c0 01             	add    $0x1,%eax$/;"	l
 a7	grep.asm	/^  a7:	50                   	push   %eax$/;"	l
-a7	hello_test.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-a7	helloname_test.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+a7	hello_test.asm	/^  a7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+a7	helloname_test.asm	/^  a7:	83 c2 01             	add    $0x1,%edx$/;"	l
 a7	kill.asm	/^  a7:	53                   	push   %ebx$/;"	l
 a7	seqdec_prio.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a7	seqinc_prio.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
@@ -598,10 +622,16 @@ a7	zombie.asm	/^  a7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 a70	sh.asm	/^     a70:	74 16                	je     a88 <nulterminate+0x88>$/;"	l
 a70	usertests.asm	/^     a70:	50                   	push   %eax$/;"	l
 a71	usertests.asm	/^     a71:	e8 1d 2f 00 00       	call   3993 <pipe>$/;"	l
+a72	grep.asm	/^ a72:	00 00 00 $/;"	l
+a72	ls.asm	/^ a72:	00 00 00 $/;"	l
 a72	sh.asm	/^     a72:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+a75	grep.asm	/^ a75:	e9 36 ff ff ff       	jmp    9b0 <malloc+0x30>$/;"	l
+a75	ls.asm	/^ a75:	e9 36 ff ff ff       	jmp    9b0 <malloc+0x30>$/;"	l
 a76	usertests.asm	/^     a76:	83 c4 10             	add    $0x10,%esp$/;"	l
 a78	sh.asm	/^     a78:	8b 50 24             	mov    0x24(%eax),%edx$/;"	l
 a79	usertests.asm	/^     a79:	85 c0                	test   %eax,%eax$/;"	l
+a7a	grep.asm	/^ a7a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+a7a	ls.asm	/^ a7a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 a7b	sh.asm	/^     a7b:	83 c0 04             	add    $0x4,%eax$/;"	l
 a7b	usertests.asm	/^     a7b:	0f 85 38 01 00 00    	jne    bb9 <pipe1+0x159>$/;"	l
 a7e	sh.asm	/^     a7e:	c6 02 00             	movb   $0x0,(%edx)$/;"	l
@@ -610,8 +640,14 @@ a8	kill.asm	/^  a8:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 a8	ln.asm	/^  a8:	eb 26                	jmp    d0 <strcmp+0x40>$/;"	l
 a8	usertests.asm	/^      a8:	e8 e3 05 00 00       	call   690 <writetest1>$/;"	l
 a8	wc.asm	/^  a8:	56                   	push   %esi$/;"	l
+a80	grep.asm	/^ a80:	8b 0a                	mov    (%edx),%ecx$/;"	l
+a80	ls.asm	/^ a80:	8b 0a                	mov    (%edx),%ecx$/;"	l
 a81	sh.asm	/^     a81:	8b 50 fc             	mov    -0x4(%eax),%edx$/;"	l
 a81	usertests.asm	/^     a81:	e8 f5 2e 00 00       	call   397b <fork>$/;"	l
+a82	grep.asm	/^ a82:	89 08                	mov    %ecx,(%eax)$/;"	l
+a82	ls.asm	/^ a82:	89 08                	mov    %ecx,(%eax)$/;"	l
+a84	grep.asm	/^ a84:	eb b1                	jmp    a37 <malloc+0xb7>$/;"	l
+a84	ls.asm	/^ a84:	eb b1                	jmp    a37 <malloc+0xb7>$/;"	l
 a84	sh.asm	/^     a84:	85 d2                	test   %edx,%edx$/;"	l
 a86	sh.asm	/^     a86:	75 f0                	jne    a78 <nulterminate+0x78>$/;"	l
 a86	usertests.asm	/^     a86:	85 c0                	test   %eax,%eax$/;"	l
@@ -635,6 +671,10 @@ a9b	sh.asm	/^     a9b:	8b 43 0c             	mov    0xc(%ebx),%eax$/;"	l
 a9c	usertests.asm	/^     a9c:	be 01 00 00 00       	mov    $0x1,%esi$/;"	l
 a9e	sh.asm	/^     a9e:	83 c4 10             	add    $0x10,%esp$/;"	l
 aa	echo.asm	/^  aa:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+aa	getnumproc_test.asm	/^  aa:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
+aa	getprocinfo_test.asm	/^  aa:	84 d2                	test   %dl,%dl$/;"	l
+aa	hello_test.asm	/^  aa:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
+aa	helloname_test.asm	/^  aa:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 aa	ln.asm	/^  aa:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 aa	mkdir.asm	/^  aa:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 aa	rm.asm	/^  aa:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
@@ -651,7 +691,7 @@ aab	sh.asm	/^     aab:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 aad	usertests.asm	/^     aad:	83 c4 10             	add    $0x10,%esp$/;"	l
 aaf	sh.asm	/^     aaf:	90                   	nop$/;"	l
 ab	cat.asm	/^  ab:	e8 e3 02 00 00       	call   393 <write>$/;"	l
-ab	init.asm	/^  ab:	68 46 08 00 00       	push   $0x846$/;"	l
+ab	init.asm	/^  ab:	68 66 08 00 00       	push   $0x866$/;"	l
 ab	kill.asm	/^  ab:	8b 55 0c             	mov    0xc(%ebp),%edx$/;"	l
 ab	ls.asm	/^  ab:	83 c4 0c             	add    $0xc,%esp$/;"	l
 ab0	sh.asm	/^     ab0:	31 c0                	xor    %eax,%eax$/;"	l
@@ -659,12 +699,13 @@ ab0	usertests.asm	/^     ab0:	83 ec 04             	sub    $0x4,%esp$/;"	l
 ab2	sh.asm	/^     ab2:	eb 8d                	jmp    a41 <nulterminate+0x41>$/;"	l
 ab3	usertests.asm	/^     ab3:	56                   	push   %esi$/;"	l
 ab4	sh.asm	/^     ab4:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-ab4	usertests.asm	/^     ab4:	68 c0 86 00 00       	push   $0x86c0$/;"	l
+ab4	usertests.asm	/^     ab4:	68 e0 86 00 00       	push   $0x86e0$/;"	l
 ab9	usertests.asm	/^     ab9:	ff 75 e0             	pushl  -0x20(%ebp)$/;"	l
 abb	sh.asm	/^     abb:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 abc	usertests.asm	/^     abc:	e8 da 2e 00 00       	call   399b <read>$/;"	l
 abf	sh.asm	/^     abf:	90                   	nop$/;"	l
 ac	forktest.asm	/^  ac:	75 f2                	jne    a0 <forktest+0x50>$/;"	l
+ac	getprocinfo_test.asm	/^  ac:	75 f2                	jne    a0 <strcpy+0x10>$/;"	l
 ac	stressfs.asm	/^  ac:	83 c4 10             	add    $0x10,%esp$/;"	l
 ac	wc.asm	/^  ac:	83 ec 1c             	sub    $0x1c,%esp$/;"	l
 ac0	sh.asm	/^     ac0:	f3 0f 1e fb          	endbr32 $/;"	l
@@ -682,7 +723,10 @@ ace	usertests.asm	/^     ace:	8d 0c 3b             	lea    (%ebx,%edi,1),%ecx$/;
 acf	sh.asm	/^     acf:	53                   	push   %ebx$/;"	l
 acquire	spinlock.c	/^acquire(struct spinlock *lk)$/;"	f	typeref:typename:void
 acquiresleep	sleeplock.c	/^acquiresleep(struct sleeplock *lk)$/;"	f	typeref:typename:void
+ad	getnumproc_test.asm	/^  ad:	74 21                	je     d0 <strlen+0x30>$/;"	l
 ad	grep.asm	/^  ad:	e8 f1 04 00 00       	call   5a3 <exit>$/;"	l
+ad	hello_test.asm	/^  ad:	74 21                	je     d0 <strlen+0x30>$/;"	l
+ad	helloname_test.asm	/^  ad:	84 c0                	test   %al,%al$/;"	l
 ad	usertests.asm	/^      ad:	e8 ae 07 00 00       	call   860 <createtest>$/;"	l
 ad0	sh.asm	/^     ad0:	e8 db 00 00 00       	call   bb0 <strlen>$/;"	l
 ad1	usertests.asm	/^     ad1:	31 c0                	xor    %eax,%eax$/;"	l
@@ -696,19 +740,17 @@ ad9	sh.asm	/^     ad9:	8d 45 08             	lea    0x8(%ebp),%eax$/;"	l
 ada	usertests.asm	/^     ada:	83 c3 01             	add    $0x1,%ebx$/;"	l
 adc	sh.asm	/^     adc:	53                   	push   %ebx$/;"	l
 add	sh.asm	/^     add:	50                   	push   %eax$/;"	l
-add	usertests.asm	/^     add:	38 90 c0 86 00 00    	cmp    %dl,0x86c0(%eax)$/;"	l
+add	usertests.asm	/^     add:	38 90 e0 86 00 00    	cmp    %dl,0x86e0(%eax)$/;"	l
+addr	kernel.asm	/^	addr = myproc()->sz;$/;"	d
 addr	kernel.asm	/^  addr = P2V(a);$/;"	d
-addr	kernel.asm	/^  addr = myproc()->sz;$/;"	d
 addr	mp.h	/^  uint *addr;                  \/\/ I\/O APIC address$/;"	m	struct:mpioapic	typeref:typename:uint *
 addrs	file.h	/^  uint addrs[NDIRECT+1];$/;"	m	struct:inode	typeref:typename:uint[]
 addrs	fs.h	/^  uint addrs[NDIRECT+1];   \/\/ Data block addresses$/;"	m	struct:dinode	typeref:typename:uint[]
 ade	sh.asm	/^     ade:	e8 dd fd ff ff       	call   8c0 <parseline>$/;"	l
+ae	clear.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
 ae	forktest.asm	/^  ae:	e8 08 03 00 00       	call   3bb <wait>$/;"	l
 ae	getmaxpid_test.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
-ae	getnumproc_test.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
-ae	getprocinfo_test.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
-ae	hello_test.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
-ae	helloname_test.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
+ae	getprocinfo_test.asm	/^  ae:	89 c8                	mov    %ecx,%eax$/;"	l
 ae	kill.asm	/^  ae:	0f b6 01             	movzbl (%ecx),%eax$/;"	l
 ae	ls.asm	/^  ae:	50                   	push   %eax$/;"	l
 ae	seqdec_prio.asm	/^  ae:	66 90                	xchg   %ax,%ax$/;"	l
@@ -721,11 +763,14 @@ ae6	sh.asm	/^     ae6:	89 c6                	mov    %eax,%esi$/;"	l
 ae8	sh.asm	/^     ae8:	8d 45 08             	lea    0x8(%ebp),%eax$/;"	l
 ae8	usertests.asm	/^     ae8:	39 d9                	cmp    %ebx,%ecx$/;"	l
 aea	usertests.asm	/^     aea:	75 ec                	jne    ad8 <pipe1+0x78>$/;"	l
-aeb	sh.asm	/^     aeb:	68 71 12 00 00       	push   $0x1271$/;"	l
+aeb	sh.asm	/^     aeb:	68 91 12 00 00       	push   $0x1291$/;"	l
 aec	usertests.asm	/^     aec:	01 f6                	add    %esi,%esi$/;"	l
 aee	usertests.asm	/^     aee:	01 7d d4             	add    %edi,-0x2c(%ebp)$/;"	l
+af	getnumproc_test.asm	/^  af:	31 c0                	xor    %eax,%eax$/;"	l
+af	hello_test.asm	/^  af:	31 c0                	xor    %eax,%eax$/;"	l
+af	helloname_test.asm	/^  af:	74 0f                	je     c0 <strcmp+0x40>$/;"	l
 af	ls.asm	/^  af:	53                   	push   %ebx$/;"	l
-af	sh.asm	/^      af:	c7 04 24 43 19 00 00 	movl   $0x1943,(%esp)$/;"	l
+af	sh.asm	/^      af:	c7 04 24 63 19 00 00 	movl   $0x1963,(%esp)$/;"	l
 af	stressfs.asm	/^  af:	89 c7                	mov    %eax,%edi$/;"	l
 af	wc.asm	/^  af:	c7 45 e4 00 00 00 00 	movl   $0x0,-0x1c(%ebp)$/;"	l
 af0	sh.asm	/^     af0:	53                   	push   %ebx$/;"	l
@@ -746,6 +791,7 @@ alltraps	kernel.asm	/^alltraps:$/;"	l
 alltraps	trapasm.S	/^alltraps:$/;"	l
 amt	usertests.asm	/^  amt = (BIG) - (uint)a;$/;"	d
 ap	cat.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
+ap	clear.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
 ap	echo.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
 ap	getmaxpid_test.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
 ap	getnumproc_test.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
@@ -766,7 +812,7 @@ ap	stressfs.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
 ap	usertests.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
 ap	wc.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
 ap	zombie.asm	/^  ap = (uint*)(void*)&fmt + 1;$/;"	d
-apicid	kernel.asm	/^  apicid = lapicid();$/;"	d
+apicid	kernel.asm	/^	apicid = lapicid();$/;"	d
 apicid	mp.h	/^  uchar apicid;                 \/\/ local APIC id$/;"	m	struct:mpproc	typeref:typename:uchar
 apicid	proc.h	/^  uchar apicid;                \/\/ Local APIC ID$/;"	m	struct:cpu	typeref:typename:uchar
 apicno	mp.h	/^  uchar apicno;                 \/\/ I\/O APIC id$/;"	m	struct:mpioapic	typeref:typename:uchar
@@ -784,8 +830,11 @@ argv	sh.c	/^  char *argv[MAXARGS];$/;"	m	struct:execcmd	typeref:typename:char * 
 atoi	ulib.c	/^atoi(const char *s)$/;"	f	typeref:typename:int
 avl	mmu.h	/^  uint avl : 1;        \/\/ Unused (available for software use)$/;"	m	struct:segdesc	typeref:typename:uint:1
 b	cat.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
+b	clear.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
 b	echo.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
+b	getprocinfo_test.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
 b	grep.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
+b	helloname_test.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
 b	init.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
 b	kernel.asm	/^  b = bget(dev, blockno);$/;"	d
 b	kill.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
@@ -800,15 +849,13 @@ b	usertests.asm	/^    b = sbrk(1);$/;"	d
 b	wc.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
 b	zombie.asm	/^   b:	ff 71 fc             	pushl  -0x4(%ecx)$/;"	l
 b0	cat.asm	/^  b0:	83 c4 10             	add    $0x10,%esp$/;"	l
+b0	clear.asm	/^  b0:	f3 0f 1e fb          	endbr32 $/;"	l
 b0	echo.asm	/^  b0:	f3 0f 1e fb          	endbr32 $/;"	l
 b0	getmaxpid_test.asm	/^  b0:	31 c9                	xor    %ecx,%ecx$/;"	l
-b0	getnumproc_test.asm	/^  b0:	31 c9                	xor    %ecx,%ecx$/;"	l
-b0	getprocinfo_test.asm	/^  b0:	31 c9                	xor    %ecx,%ecx$/;"	l
-b0	hello_test.asm	/^  b0:	31 c9                	xor    %ecx,%ecx$/;"	l
-b0	helloname_test.asm	/^  b0:	31 c9                	xor    %ecx,%ecx$/;"	l
+b0	getprocinfo_test.asm	/^  b0:	5b                   	pop    %ebx$/;"	l
 b0	init.asm	/^  b0:	e8 d6 02 00 00       	call   38b <exec>$/;"	l
 b0	ln.asm	/^  b0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
-b0	ls.asm	/^  b0:	68 e4 0d 00 00       	push   $0xde4$/;"	l
+b0	ls.asm	/^  b0:	68 04 0e 00 00       	push   $0xe04$/;"	l
 b0	mkdir.asm	/^  b0:	f3 0f 1e fb          	endbr32 $/;"	l
 b0	rm.asm	/^  b0:	f3 0f 1e fb          	endbr32 $/;"	l
 b0	seqdec_prio.asm	/^  b0:	31 c9                	xor    %ecx,%ecx$/;"	l
@@ -817,13 +864,17 @@ b0	zombie.asm	/^  b0:	f3 0f 1e fb          	endbr32 $/;"	l
 b01	sh.asm	/^     b01:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 b01	usertests.asm	/^     b01:	83 ec 08             	sub    $0x8,%esp$/;"	l
 b04	sh.asm	/^     b04:	56                   	push   %esi$/;"	l
-b04	usertests.asm	/^     b04:	68 9e 41 00 00       	push   $0x419e$/;"	l
+b04	usertests.asm	/^     b04:	68 be 41 00 00       	push   $0x41be$/;"	l
 b05	sh.asm	/^     b05:	e8 f6 fe ff ff       	call   a00 <nulterminate>$/;"	l
 b09	usertests.asm	/^     b09:	6a 01                	push   $0x1$/;"	l
 b0a	sh.asm	/^     b0a:	8d 65 f8             	lea    -0x8(%ebp),%esp$/;"	l
-b0b	usertests.asm	/^     b0b:	e8 d0 2f 00 00       	call   3ae0 <printf>$/;"	l
+b0b	usertests.asm	/^     b0b:	e8 f0 2f 00 00       	call   3b00 <printf>$/;"	l
 b0d	sh.asm	/^     b0d:	89 f0                	mov    %esi,%eax$/;"	l
 b0f	sh.asm	/^     b0f:	5b                   	pop    %ebx$/;"	l
+b1	getnumproc_test.asm	/^  b1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+b1	getprocinfo_test.asm	/^  b1:	5d                   	pop    %ebp$/;"	l
+b1	hello_test.asm	/^  b1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+b1	helloname_test.asm	/^  b1:	38 d8                	cmp    %bl,%al$/;"	l
 b1	kill.asm	/^  b1:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 b1	stressfs.asm	/^  b1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 b10	sh.asm	/^     b10:	5e                   	pop    %esi$/;"	l
@@ -833,7 +884,7 @@ b12	sh.asm	/^     b12:	c3                   	ret    $/;"	l
 b13	sh.asm	/^     b13:	52                   	push   %edx$/;"	l
 b13	usertests.asm	/^     b13:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
 b14	sh.asm	/^     b14:	50                   	push   %eax$/;"	l
-b15	sh.asm	/^     b15:	68 ea 12 00 00       	push   $0x12ea$/;"	l
+b15	sh.asm	/^     b15:	68 0a 13 00 00       	push   $0x130a$/;"	l
 b16	usertests.asm	/^     b16:	5b                   	pop    %ebx$/;"	l
 b17	usertests.asm	/^     b17:	5e                   	pop    %esi$/;"	l
 b18	usertests.asm	/^     b18:	5f                   	pop    %edi$/;"	l
@@ -841,18 +892,15 @@ b19	usertests.asm	/^     b19:	5d                   	pop    %ebp$/;"	l
 b1a	sh.asm	/^     b1a:	6a 02                	push   $0x2$/;"	l
 b1a	usertests.asm	/^     b1a:	c3                   	ret    $/;"	l
 b1b	usertests.asm	/^     b1b:	83 ec 0c             	sub    $0xc,%esp$/;"	l
-b1c	sh.asm	/^     b1c:	e8 cf 03 00 00       	call   ef0 <printf>$/;"	l
+b1c	sh.asm	/^     b1c:	e8 ef 03 00 00       	call   f10 <printf>$/;"	l
 b1e	usertests.asm	/^     b1e:	ff 75 e0             	pushl  -0x20(%ebp)$/;"	l
 b2	getmaxpid_test.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
-b2	getnumproc_test.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
-b2	getprocinfo_test.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
+b2	getprocinfo_test.asm	/^  b2:	c3                   	ret    $/;"	l
 b2	grep.asm	/^  b2:	66 90                	xchg   %ax,%ax$/;"	l
-b2	hello_test.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
-b2	helloname_test.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
 b2	seqdec_prio.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
 b2	seqinc_prio.asm	/^  b2:	5d                   	pop    %ebp$/;"	l
 b2	usertests.asm	/^      b2:	e8 59 02 00 00       	call   310 <openiputtest>$/;"	l
-b21	sh.asm	/^     b21:	c7 04 24 ae 12 00 00 	movl   $0x12ae,(%esp)$/;"	l
+b21	sh.asm	/^     b21:	c7 04 24 ce 12 00 00 	movl   $0x12ce,(%esp)$/;"	l
 b21	usertests.asm	/^     b21:	31 db                	xor    %ebx,%ebx$/;"	l
 b23	usertests.asm	/^     b23:	e8 83 2e 00 00       	call   39ab <close>$/;"	l
 b28	sh.asm	/^     b28:	e8 33 f6 ff ff       	call   160 <panic>$/;"	l
@@ -864,10 +912,8 @@ b2f	sh.asm	/^     b2f:	90                   	nop$/;"	l
 b3	cat.asm	/^  b3:	39 d8                	cmp    %ebx,%eax$/;"	l
 b3	forktest.asm	/^  b3:	83 f8 ff             	cmp    $0xffffffff,%eax$/;"	l
 b3	getmaxpid_test.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
-b3	getnumproc_test.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
-b3	getprocinfo_test.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
-b3	hello_test.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
-b3	helloname_test.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
+b3	getprocinfo_test.asm	/^  b3:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+b3	helloname_test.asm	/^  b3:	74 eb                	je     a0 <strcmp+0x20>$/;"	l
 b3	seqdec_prio.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
 b3	seqinc_prio.asm	/^  b3:	89 c8                	mov    %ecx,%eax$/;"	l
 b30	sh.asm	/^     b30:	f3 0f 1e fb          	endbr32 $/;"	l
@@ -875,12 +921,13 @@ b30	usertests.asm	/^     b30:	8d 14 18             	lea    (%eax,%ebx,1),%edx$/;
 b33	usertests.asm	/^     b33:	83 c0 01             	add    $0x1,%eax$/;"	l
 b34	sh.asm	/^     b34:	55                   	push   %ebp$/;"	l
 b35	sh.asm	/^     b35:	31 c0                	xor    %eax,%eax$/;"	l
-b36	usertests.asm	/^     b36:	88 90 bf 86 00 00    	mov    %dl,0x86bf(%eax)$/;"	l
+b36	usertests.asm	/^     b36:	88 90 df 86 00 00    	mov    %dl,0x86df(%eax)$/;"	l
 b37	sh.asm	/^     b37:	89 e5                	mov    %esp,%ebp$/;"	l
 b39	sh.asm	/^     b39:	53                   	push   %ebx$/;"	l
 b3a	sh.asm	/^     b3a:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 b3c	usertests.asm	/^     b3c:	3d 09 04 00 00       	cmp    $0x409,%eax$/;"	l
 b3d	sh.asm	/^     b3d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
+b4	clear.asm	/^  b4:	55                   	push   %ebp$/;"	l
 b4	echo.asm	/^  b4:	55                   	push   %ebp$/;"	l
 b4	grep.asm	/^  b4:	66 90                	xchg   %ax,%ax$/;"	l
 b4	kill.asm	/^  b4:	84 c0                	test   %al,%al$/;"	l
@@ -899,12 +946,10 @@ b4c	sh.asm	/^     b4c:	75 f2                	jne    b40 <strcpy+0x10>$/;"	l
 b4c	usertests.asm	/^     b4c:	68 09 04 00 00       	push   $0x409$/;"	l
 b4e	sh.asm	/^     b4e:	89 c8                	mov    %ecx,%eax$/;"	l
 b5	cat.asm	/^  b5:	75 25                	jne    dc <cat+0x4c>$/;"	l
+b5	clear.asm	/^  b5:	89 e5                	mov    %esp,%ebp$/;"	l
 b5	echo.asm	/^  b5:	89 e5                	mov    %esp,%ebp$/;"	l
 b5	getmaxpid_test.asm	/^  b5:	c3                   	ret    $/;"	l
-b5	getnumproc_test.asm	/^  b5:	c3                   	ret    $/;"	l
-b5	getprocinfo_test.asm	/^  b5:	c3                   	ret    $/;"	l
-b5	hello_test.asm	/^  b5:	c3                   	ret    $/;"	l
-b5	helloname_test.asm	/^  b5:	c3                   	ret    $/;"	l
+b5	helloname_test.asm	/^  b5:	29 d8                	sub    %ebx,%eax$/;"	l
 b5	init.asm	/^  b5:	5a                   	pop    %edx$/;"	l
 b5	ls.asm	/^  b5:	e8 b6 04 00 00       	call   570 <memmove>$/;"	l
 b5	mkdir.asm	/^  b5:	89 e5                	mov    %esp,%ebp$/;"	l
@@ -914,7 +959,7 @@ b5	seqinc_prio.asm	/^  b5:	c3                   	ret    $/;"	l
 b5	zombie.asm	/^  b5:	89 e5                	mov    %esp,%ebp$/;"	l
 b50	sh.asm	/^     b50:	5b                   	pop    %ebx$/;"	l
 b51	sh.asm	/^     b51:	5d                   	pop    %ebp$/;"	l
-b51	usertests.asm	/^     b51:	68 c0 86 00 00       	push   $0x86c0$/;"	l
+b51	usertests.asm	/^     b51:	68 e0 86 00 00       	push   $0x86e0$/;"	l
 b52	sh.asm	/^     b52:	c3                   	ret    $/;"	l
 b53	sh.asm	/^     b53:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 b56	usertests.asm	/^     b56:	ff 75 e4             	pushl  -0x1c(%ebp)$/;"	l
@@ -923,16 +968,12 @@ b5a	sh.asm	/^     b5a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 b5e	usertests.asm	/^     b5e:	83 c4 10             	add    $0x10,%esp$/;"	l
 b6	forktest.asm	/^  b6:	75 49                	jne    101 <forktest+0xb1>$/;"	l
 b6	getmaxpid_test.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-b6	getnumproc_test.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-b6	getprocinfo_test.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 b6	grep.asm	/^  b6:	66 90                	xchg   %ax,%ax$/;"	l
-b6	hello_test.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-b6	helloname_test.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 b6	init.asm	/^  b6:	59                   	pop    %ecx$/;"	l
 b6	kill.asm	/^  b6:	75 19                	jne    d1 <strcmp+0x31>$/;"	l
 b6	seqdec_prio.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 b6	seqinc_prio.asm	/^  b6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-b6	sh.asm	/^      b6:	c6 80 3f 19 00 00 00 	movb   $0x0,0x193f(%eax)$/;"	l
+b6	sh.asm	/^      b6:	c6 80 5f 19 00 00 00 	movb   $0x0,0x195f(%eax)$/;"	l
 b6	wc.asm	/^  b6:	c7 45 dc 00 00 00 00 	movl   $0x0,-0x24(%ebp)$/;"	l
 b60	sh.asm	/^     b60:	f3 0f 1e fb          	endbr32 $/;"	l
 b61	usertests.asm	/^     b61:	3d 09 04 00 00       	cmp    $0x409,%eax$/;"	l
@@ -946,8 +987,10 @@ b6b	sh.asm	/^     b6b:	8b 55 0c             	mov    0xc(%ebp),%edx$/;"	l
 b6e	sh.asm	/^     b6e:	0f b6 01             	movzbl (%ecx),%eax$/;"	l
 b6e	usertests.asm	/^     b6e:	75 bb                	jne    b2b <pipe1+0xcb>$/;"	l
 b7	cat.asm	/^  b7:	83 ec 04             	sub    $0x4,%esp$/;"	l
+b7	clear.asm	/^  b7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
 b7	echo.asm	/^  b7:	53                   	push   %ebx$/;"	l
-b7	init.asm	/^  b7:	68 49 08 00 00       	push   $0x849$/;"	l
+b7	helloname_test.asm	/^  b7:	5b                   	pop    %ebx$/;"	l
+b7	init.asm	/^  b7:	68 69 08 00 00       	push   $0x869$/;"	l
 b7	ln.asm	/^  b7:	83 c2 01             	add    $0x1,%edx$/;"	l
 b7	mkdir.asm	/^  b7:	53                   	push   %ebx$/;"	l
 b7	rm.asm	/^  b7:	53                   	push   %ebx$/;"	l
@@ -964,7 +1007,10 @@ b7c	usertests.asm	/^     b7c:	75 26                	jne    ba4 <pipe1+0x144>$/;"
 b7e	usertests.asm	/^     b7e:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 b8	echo.asm	/^  b8:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 b8	forktest.asm	/^  b8:	83 ec 0c             	sub    $0xc,%esp$/;"	l
+b8	getnumproc_test.asm	/^  b8:	83 c0 01             	add    $0x1,%eax$/;"	l
 b8	grep.asm	/^  b8:	66 90                	xchg   %ax,%ax$/;"	l
+b8	hello_test.asm	/^  b8:	83 c0 01             	add    $0x1,%eax$/;"	l
+b8	helloname_test.asm	/^  b8:	5d                   	pop    %ebp$/;"	l
 b8	kill.asm	/^  b8:	eb 26                	jmp    e0 <strcmp+0x40>$/;"	l
 b8	mkdir.asm	/^  b8:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 b8	rm.asm	/^  b8:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
@@ -980,20 +1026,24 @@ b8d	sh.asm	/^     b8d:	84 c0                	test   %al,%al$/;"	l
 b8e	usertests.asm	/^     b8e:	5a                   	pop    %edx$/;"	l
 b8f	sh.asm	/^     b8f:	74 0f                	je     ba0 <strcmp+0x40>$/;"	l
 b8f	usertests.asm	/^     b8f:	59                   	pop    %ecx$/;"	l
-b90	usertests.asm	/^     b90:	68 c3 41 00 00       	push   $0x41c3$/;"	l
+b9	helloname_test.asm	/^  b9:	c3                   	ret    $/;"	l
+b90	usertests.asm	/^     b90:	68 e3 41 00 00       	push   $0x41e3$/;"	l
 b91	sh.asm	/^     b91:	38 d8                	cmp    %bl,%al$/;"	l
 b93	sh.asm	/^     b93:	74 eb                	je     b80 <strcmp+0x20>$/;"	l
 b95	sh.asm	/^     b95:	29 d8                	sub    %ebx,%eax$/;"	l
 b95	usertests.asm	/^     b95:	6a 01                	push   $0x1$/;"	l
 b97	sh.asm	/^     b97:	5b                   	pop    %ebx$/;"	l
-b97	usertests.asm	/^     b97:	e8 44 2f 00 00       	call   3ae0 <printf>$/;"	l
+b97	usertests.asm	/^     b97:	e8 64 2f 00 00       	call   3b00 <printf>$/;"	l
 b98	sh.asm	/^     b98:	5d                   	pop    %ebp$/;"	l
 b99	sh.asm	/^     b99:	c3                   	ret    $/;"	l
 b9a	sh.asm	/^     b9a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 b9c	usertests.asm	/^     b9c:	83 c4 10             	add    $0x10,%esp$/;"	l
 b9f	usertests.asm	/^     b9f:	e9 6f ff ff ff       	jmp    b13 <pipe1+0xb3>$/;"	l
 ba	cat.asm	/^  ba:	68 00 02 00 00       	push   $0x200$/;"	l
+ba	clear.asm	/^  ba:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
+ba	getprocinfo_test.asm	/^  ba:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ba	grep.asm	/^  ba:	66 90                	xchg   %ax,%ax$/;"	l
+ba	helloname_test.asm	/^  ba:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ba	kill.asm	/^  ba:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ba	ln.asm	/^  ba:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 ba	ls.asm	/^  ba:	89 1c 24             	mov    %ebx,(%esp)$/;"	l
@@ -1006,14 +1056,14 @@ ba5	sh.asm	/^     ba5:	5d                   	pop    %ebp$/;"	l
 ba5	usertests.asm	/^     ba5:	ff 75 d4             	pushl  -0x2c(%ebp)$/;"	l
 ba6	sh.asm	/^     ba6:	c3                   	ret    $/;"	l
 ba7	sh.asm	/^     ba7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-ba8	usertests.asm	/^     ba8:	68 ac 41 00 00       	push   $0x41ac$/;"	l
+ba8	usertests.asm	/^     ba8:	68 cc 41 00 00       	push   $0x41cc$/;"	l
 backcmd	sh.c	/^backcmd(struct cmd *subcmd)$/;"	f	typeref:struct:cmd *
 backcmd	sh.c	/^struct backcmd {$/;"	s	file:
 bad	kernel.asm	/^ bad:$/;"	l
 bad	kernel.asm	/^bad:$/;"	l
 bad	usertests.asm	/^     bad:	6a 01                	push   $0x1$/;"	l
 bae	sh.asm	/^     bae:	66 90                	xchg   %ax,%ax$/;"	l
-baf	usertests.asm	/^     baf:	e8 2c 2f 00 00       	call   3ae0 <printf>$/;"	l
+baf	usertests.asm	/^     baf:	e8 4c 2f 00 00       	call   3b00 <printf>$/;"	l
 balloc	fs.c	/^balloc(uint dev)$/;"	f	typeref:typename:uint	file:
 balloc	mkfs.c	/^balloc(int used)$/;"	f	typeref:typename:void
 base	umalloc.c	/^static Header base;$/;"	v	typeref:typename:Header	file:
@@ -1021,7 +1071,9 @@ base_15_0	mmu.h	/^  uint base_15_0 : 16; \/\/ Low bits of segment base address$/
 base_23_16	mmu.h	/^  uint base_23_16 : 8; \/\/ Middle bits of segment base address$/;"	m	struct:segdesc	typeref:typename:uint:8
 base_31_24	mmu.h	/^  uint base_31_24 : 8; \/\/ High bits of segment base address$/;"	m	struct:segdesc	typeref:typename:uint:8
 bb	echo.asm	/^  bb:	8b 55 0c             	mov    0xc(%ebp),%edx$/;"	l
-bb	forktest.asm	/^  bb:	68 86 04 00 00       	push   $0x486$/;"	l
+bb	forktest.asm	/^  bb:	68 ae 04 00 00       	push   $0x4ae$/;"	l
+bb	getnumproc_test.asm	/^  bb:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)$/;"	l
+bb	hello_test.asm	/^  bb:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)$/;"	l
 bb	mkdir.asm	/^  bb:	8b 55 0c             	mov    0xc(%ebp),%edx$/;"	l
 bb	rm.asm	/^  bb:	8b 55 0c             	mov    0xc(%ebp),%edx$/;"	l
 bb	stressfs.asm	/^  bb:	68 00 02 00 00       	push   $0x200$/;"	l
@@ -1033,7 +1085,7 @@ bb7	sh.asm	/^     bb7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
 bb9	usertests.asm	/^     bb9:	57                   	push   %edi$/;"	l
 bba	sh.asm	/^     bba:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
 bba	usertests.asm	/^     bba:	57                   	push   %edi$/;"	l
-bbb	usertests.asm	/^     bbb:	68 81 41 00 00       	push   $0x4181$/;"	l
+bbb	usertests.asm	/^     bbb:	68 a1 41 00 00       	push   $0x41a1$/;"	l
 bbd	sh.asm	/^     bbd:	74 21                	je     be0 <strlen+0x30>$/;"	l
 bbf	sh.asm	/^     bbf:	31 c0                	xor    %eax,%eax$/;"	l
 bc	grep.asm	/^  bc:	66 90                	xchg   %ax,%ax$/;"	l
@@ -1041,7 +1093,7 @@ bc	init.asm	/^  bc:	6a 01                	push   $0x1$/;"	l
 bc	usertests.asm	/^      bc:	e8 5f 00 00 00       	call   120 <iputtest>$/;"	l
 bc0	usertests.asm	/^     bc0:	6a 01                	push   $0x1$/;"	l
 bc1	sh.asm	/^     bc1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-bc2	usertests.asm	/^     bc2:	e8 19 2f 00 00       	call   3ae0 <printf>$/;"	l
+bc2	usertests.asm	/^     bc2:	e8 39 2f 00 00       	call   3b00 <printf>$/;"	l
 bc7	usertests.asm	/^     bc7:	e8 b7 2d 00 00       	call   3983 <exit>$/;"	l
 bc8	sh.asm	/^     bc8:	83 c0 01             	add    $0x1,%eax$/;"	l
 bcache	bio.c	/^} bcache;$/;"	v	typeref:struct:__anon0f27d3d00108
@@ -1049,14 +1101,11 @@ bcb	sh.asm	/^     bcb:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)$/;"	l
 bcc	usertests.asm	/^     bcc:	50                   	push   %eax$/;"	l
 bcd	kernel.asm	/^  bcd = (sb & (1 << 2)) == 0;$/;"	d
 bcd	usertests.asm	/^     bcd:	50                   	push   %eax$/;"	l
-bce	usertests.asm	/^     bce:	68 cd 41 00 00       	push   $0x41cd$/;"	l
+bce	usertests.asm	/^     bce:	68 ed 41 00 00       	push   $0x41ed$/;"	l
 bcf	sh.asm	/^     bcf:	89 c1                	mov    %eax,%ecx$/;"	l
 bcmd	sh.asm	/^    bcmd = (struct backcmd*)cmd;$/;"	d
+bd	clear.asm	/^  bd:	74 21                	je     e0 <strlen+0x30>$/;"	l
 bd	getmaxpid_test.asm	/^  bd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-bd	getnumproc_test.asm	/^  bd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-bd	getprocinfo_test.asm	/^  bd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-bd	hello_test.asm	/^  bd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-bd	helloname_test.asm	/^  bd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
 bd	ln.asm	/^  bd:	84 c0                	test   %al,%al$/;"	l
 bd	ls.asm	/^  bd:	e8 fe 02 00 00       	call   3c0 <strlen>$/;"	l
 bd	seqdec_prio.asm	/^  bd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
@@ -1068,7 +1117,7 @@ bd1	sh.asm	/^     bd1:	75 f5                	jne    bc8 <strlen+0x18>$/;"	l
 bd3	sh.asm	/^     bd3:	89 c8                	mov    %ecx,%eax$/;"	l
 bd3	usertests.asm	/^     bd3:	6a 01                	push   $0x1$/;"	l
 bd5	sh.asm	/^     bd5:	5d                   	pop    %ebp$/;"	l
-bd5	usertests.asm	/^     bd5:	e8 06 2f 00 00       	call   3ae0 <printf>$/;"	l
+bd5	usertests.asm	/^     bd5:	e8 26 2f 00 00       	call   3b00 <printf>$/;"	l
 bd6	sh.asm	/^     bd6:	c3                   	ret    $/;"	l
 bd7	sh.asm	/^     bd7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 bda	usertests.asm	/^     bda:	e8 a4 2d 00 00       	call   3983 <exit>$/;"	l
@@ -1076,22 +1125,25 @@ bde	sh.asm	/^     bde:	66 90                	xchg   %ax,%ax$/;"	l
 bdf	usertests.asm	/^     bdf:	56                   	push   %esi$/;"	l
 be	echo.asm	/^  be:	0f b6 01             	movzbl (%ecx),%eax$/;"	l
 be	grep.asm	/^  be:	66 90                	xchg   %ax,%ax$/;"	l
-be	init.asm	/^  be:	e8 ed 03 00 00       	call   4b0 <printf>$/;"	l
+be	init.asm	/^  be:	e8 0d 04 00 00       	call   4d0 <printf>$/;"	l
 be	mkdir.asm	/^  be:	0f b6 01             	movzbl (%ecx),%eax$/;"	l
 be	rm.asm	/^  be:	0f b6 01             	movzbl (%ecx),%eax$/;"	l
 be0	sh.asm	/^     be0:	31 c9                	xor    %ecx,%ecx$/;"	l
 be0	usertests.asm	/^     be0:	56                   	push   %esi$/;"	l
-be1	usertests.asm	/^     be1:	68 90 41 00 00       	push   $0x4190$/;"	l
+be1	usertests.asm	/^     be1:	68 b0 41 00 00       	push   $0x41b0$/;"	l
 be2	sh.asm	/^     be2:	5d                   	pop    %ebp$/;"	l
 be3	sh.asm	/^     be3:	89 c8                	mov    %ecx,%eax$/;"	l
 be5	sh.asm	/^     be5:	c3                   	ret    $/;"	l
 be6	sh.asm	/^     be6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 be6	usertests.asm	/^     be6:	6a 01                	push   $0x1$/;"	l
-be8	usertests.asm	/^     be8:	e8 f3 2e 00 00       	call   3ae0 <printf>$/;"	l
+be8	usertests.asm	/^     be8:	e8 13 2f 00 00       	call   3b00 <printf>$/;"	l
 bed	sh.asm	/^     bed:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
 bed	usertests.asm	/^     bed:	e8 91 2d 00 00       	call   3983 <exit>$/;"	l
 begin_op	log.c	/^begin_op(void)$/;"	f	typeref:typename:void
-bf	cat.asm	/^  bf:	68 80 0b 00 00       	push   $0xb80$/;"	l
+bf	cat.asm	/^  bf:	68 a0 0b 00 00       	push   $0xba0$/;"	l
+bf	clear.asm	/^  bf:	31 c0                	xor    %eax,%eax$/;"	l
+bf	getnumproc_test.asm	/^  bf:	89 c1                	mov    %eax,%ecx$/;"	l
+bf	hello_test.asm	/^  bf:	89 c1                	mov    %eax,%ecx$/;"	l
 bf	ln.asm	/^  bf:	74 0f                	je     d0 <strcmp+0x40>$/;"	l
 bf	zombie.asm	/^  bf:	31 c0                	xor    %eax,%eax$/;"	l
 bf0	sh.asm	/^     bf0:	f3 0f 1e fb          	endbr32 $/;"	l
@@ -1118,6 +1170,7 @@ bochs	Makefile	/^bochs : fs.img xv6.img$/;"	t
 bootblock	Makefile	/^bootblock: bootasm.S bootmain.c$/;"	t
 bootmain	bootmain.c	/^bootmain(void)$/;"	f	typeref:typename:void
 bp	cat.asm	/^  bp = (Header*)ap - 1;$/;"	d
+bp	clear.asm	/^  bp = (Header*)ap - 1;$/;"	d
 bp	echo.asm	/^  bp = (Header*)ap - 1;$/;"	d
 bp	getmaxpid_test.asm	/^  bp = (Header*)ap - 1;$/;"	d
 bp	getnumproc_test.asm	/^  bp = (Header*)ap - 1;$/;"	d
@@ -1158,6 +1211,7 @@ buf	wc.c	/^char buf[512];$/;"	v	typeref:typename:char[512]
 bwrite	bio.c	/^bwrite(struct buf *b)$/;"	f	typeref:typename:void
 bzero	fs.c	/^bzero(int dev, int bno)$/;"	f	typeref:typename:void	file:
 c	cat.asm	/^    c = fmt[i] & 0xff;$/;"	d
+c	clear.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	echo.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	getmaxpid_test.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	getnumproc_test.asm	/^    c = fmt[i] & 0xff;$/;"	d
@@ -1167,12 +1221,12 @@ c	hello_test.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	helloname_test.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	init.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	initcode.asm	/^   c:	b8 07 00 00 00       	mov    $0x7,%eax$/;"	l
+c	kernel.asm	/^	c = mycpu();$/;"	d
 c	kernel.asm	/^        c = (c == '\\r') ? '\\n' : c;$/;"	d
 c	kernel.asm	/^    c = fmt[++i] & 0xff;$/;"	d
 c	kernel.asm	/^    c = input.buf[input.r++ % INPUT_BUF];$/;"	d
 c	kernel.asm	/^  c = &cpus[cpuid()];$/;"	d
 c	kernel.asm	/^  c = charcode[shift & (CTL | SHIFT)][data];$/;"	d
-c	kernel.asm	/^  c = mycpu();$/;"	d
 c	kill.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	ln.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	ls.asm	/^    c = fmt[i] & 0xff;$/;"	d
@@ -1192,11 +1246,9 @@ c	wc.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c	zombie.asm	/^    c = fmt[i] & 0xff;$/;"	d
 c0	forktest.asm	/^  c0:	e8 0b 01 00 00       	call   1d0 <strlen>$/;"	l
 c0	getmaxpid_test.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
-c0	getnumproc_test.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
 c0	getprocinfo_test.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
 c0	grep.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
-c0	hello_test.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
-c0	helloname_test.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
+c0	helloname_test.asm	/^  c0:	31 c0                	xor    %eax,%eax$/;"	l
 c0	kill.asm	/^  c0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
 c0	seqdec_prio.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
 c0	seqinc_prio.asm	/^  c0:	f3 0f 1e fb          	endbr32 $/;"	l
@@ -1216,9 +1268,12 @@ c09	usertests.asm	/^     c09:	53                   	push   %ebx$/;"	l
 c0a	sh.asm	/^     c0a:	c3                   	ret    $/;"	l
 c0a	usertests.asm	/^     c0a:	83 ec 24             	sub    $0x24,%esp$/;"	l
 c0b	sh.asm	/^     c0b:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-c0d	usertests.asm	/^     c0d:	68 dc 41 00 00       	push   $0x41dc$/;"	l
+c0d	usertests.asm	/^     c0d:	68 fc 41 00 00       	push   $0x41fc$/;"	l
 c0f	sh.asm	/^     c0f:	90                   	nop$/;"	l
+c1	clear.asm	/^  c1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 c1	echo.asm	/^  c1:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
+c1	getnumproc_test.asm	/^  c1:	75 f5                	jne    b8 <strlen+0x18>$/;"	l
+c1	hello_test.asm	/^  c1:	75 f5                	jne    b8 <strlen+0x18>$/;"	l
 c1	ln.asm	/^  c1:	38 d8                	cmp    %bl,%al$/;"	l
 c1	mkdir.asm	/^  c1:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 c1	rm.asm	/^  c1:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
@@ -1228,13 +1283,14 @@ c1	zombie.asm	/^  c1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 c10	sh.asm	/^     c10:	f3 0f 1e fb          	endbr32 $/;"	l
 c12	usertests.asm	/^     c12:	6a 01                	push   $0x1$/;"	l
 c14	sh.asm	/^     c14:	55                   	push   %ebp$/;"	l
-c14	usertests.asm	/^     c14:	e8 c7 2e 00 00       	call   3ae0 <printf>$/;"	l
+c14	usertests.asm	/^     c14:	e8 e7 2e 00 00       	call   3b00 <printf>$/;"	l
 c15	sh.asm	/^     c15:	89 e5                	mov    %esp,%ebp$/;"	l
 c17	sh.asm	/^     c17:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
 c19	usertests.asm	/^     c19:	e8 5d 2d 00 00       	call   397b <fork>$/;"	l
 c1a	sh.asm	/^     c1a:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
 c1e	sh.asm	/^     c1e:	0f b6 10             	movzbl (%eax),%edx$/;"	l
 c1e	usertests.asm	/^     c1e:	83 c4 10             	add    $0x10,%esp$/;"	l
+c2	helloname_test.asm	/^  c2:	29 d8                	sub    %ebx,%eax$/;"	l
 c2	ls.asm	/^  c2:	89 1c 24             	mov    %ebx,(%esp)$/;"	l
 c2	sh.asm	/^      c2:	83 c4 10             	add    $0x10,%esp$/;"	l
 c2	stressfs.asm	/^  c2:	e8 fc 02 00 00       	call   3c3 <write>$/;"	l
@@ -1248,6 +1304,8 @@ c27	sh.asm	/^     c27:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 c27	usertests.asm	/^     c27:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 c2e	sh.asm	/^     c2e:	66 90                	xchg   %ax,%ax$/;"	l
 c2e	usertests.asm	/^     c2e:	66 90                	xchg   %ax,%ax$/;"	l
+c3	getnumproc_test.asm	/^  c3:	89 c8                	mov    %ecx,%eax$/;"	l
+c3	hello_test.asm	/^  c3:	89 c8                	mov    %ecx,%eax$/;"	l
 c3	init.asm	/^  c3:	e8 8b 02 00 00       	call   353 <exit>$/;"	l
 c3	ln.asm	/^  c3:	74 eb                	je     b0 <strcmp+0x20>$/;"	l
 c30	sh.asm	/^     c30:	0f b6 50 01          	movzbl 0x1(%eax),%edx$/;"	l
@@ -1267,11 +1325,9 @@ c3f	usertests.asm	/^     c3f:	90                   	nop$/;"	l
 c4	cat.asm	/^  c4:	56                   	push   %esi$/;"	l
 c4	echo.asm	/^  c4:	84 c0                	test   %al,%al$/;"	l
 c4	getmaxpid_test.asm	/^  c4:	55                   	push   %ebp$/;"	l
-c4	getnumproc_test.asm	/^  c4:	55                   	push   %ebp$/;"	l
 c4	getprocinfo_test.asm	/^  c4:	55                   	push   %ebp$/;"	l
 c4	grep.asm	/^  c4:	55                   	push   %ebp$/;"	l
-c4	hello_test.asm	/^  c4:	55                   	push   %ebp$/;"	l
-c4	helloname_test.asm	/^  c4:	55                   	push   %ebp$/;"	l
+c4	helloname_test.asm	/^  c4:	5b                   	pop    %ebx$/;"	l
 c4	kill.asm	/^  c4:	83 c1 01             	add    $0x1,%ecx$/;"	l
 c4	mkdir.asm	/^  c4:	84 c0                	test   %al,%al$/;"	l
 c4	rm.asm	/^  c4:	84 c0                	test   %al,%al$/;"	l
@@ -1292,13 +1348,13 @@ c4c	usertests.asm	/^     c4c:	e8 2a 2d 00 00       	call   397b <fork>$/;"	l
 c5	cat.asm	/^  c5:	e8 c1 02 00 00       	call   38b <read>$/;"	l
 c5	forktest.asm	/^  c5:	83 c4 0c             	add    $0xc,%esp$/;"	l
 c5	getmaxpid_test.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
-c5	getnumproc_test.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
+c5	getnumproc_test.asm	/^  c5:	5d                   	pop    %ebp$/;"	l
 c5	getprocinfo_test.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
 c5	grep.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
-c5	hello_test.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
-c5	helloname_test.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
+c5	hello_test.asm	/^  c5:	5d                   	pop    %ebp$/;"	l
+c5	helloname_test.asm	/^  c5:	5d                   	pop    %ebp$/;"	l
 c5	ln.asm	/^  c5:	29 d8                	sub    %ebx,%eax$/;"	l
-c5	ls.asm	/^  c5:	bb e4 0d 00 00       	mov    $0xde4,%ebx$/;"	l
+c5	ls.asm	/^  c5:	bb 04 0e 00 00       	mov    $0xe04,%ebx$/;"	l
 c5	seqdec_prio.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
 c5	seqinc_prio.asm	/^  c5:	89 e5                	mov    %esp,%ebp$/;"	l
 c5	sh.asm	/^      c5:	85 c0                	test   %eax,%eax$/;"	l
@@ -1318,6 +1374,9 @@ c5c	sh.asm	/^     c5c:	89 f3                	mov    %esi,%ebx$/;"	l
 c5d	usertests.asm	/^     c5d:	ff 75 e0             	pushl  -0x20(%ebp)$/;"	l
 c5e	sh.asm	/^     c5e:	83 ec 1c             	sub    $0x1c,%esp$/;"	l
 c6	echo.asm	/^  c6:	75 19                	jne    e1 <strcmp+0x31>$/;"	l
+c6	getnumproc_test.asm	/^  c6:	c3                   	ret    $/;"	l
+c6	hello_test.asm	/^  c6:	c3                   	ret    $/;"	l
+c6	helloname_test.asm	/^  c6:	c3                   	ret    $/;"	l
 c6	mkdir.asm	/^  c6:	75 19                	jne    e1 <strcmp+0x31>$/;"	l
 c6	rm.asm	/^  c6:	75 19                	jne    e1 <strcmp+0x31>$/;"	l
 c6	usertests.asm	/^      c6:	e8 95 09 00 00       	call   a60 <pipe1>$/;"	l
@@ -1327,15 +1386,15 @@ c64	sh.asm	/^     c64:	eb 33                	jmp    c99 <gets+0x49>$/;"	l
 c65	usertests.asm	/^     c65:	83 c4 0c             	add    $0xc,%esp$/;"	l
 c66	sh.asm	/^     c66:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 c68	usertests.asm	/^     c68:	6a 01                	push   $0x1$/;"	l
-c6a	usertests.asm	/^     c6a:	68 a1 47 00 00       	push   $0x47a1$/;"	l
+c6a	usertests.asm	/^     c6a:	68 c1 47 00 00       	push   $0x47c1$/;"	l
 c6d	sh.asm	/^     c6d:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
 c6f	usertests.asm	/^     c6f:	ff 75 e4             	pushl  -0x1c(%ebp)$/;"	l
 c7	getmaxpid_test.asm	/^  c7:	57                   	push   %edi$/;"	l
-c7	getnumproc_test.asm	/^  c7:	57                   	push   %edi$/;"	l
-c7	getprocinfo_test.asm	/^  c7:	57                   	push   %edi$/;"	l
+c7	getnumproc_test.asm	/^  c7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+c7	getprocinfo_test.asm	/^  c7:	53                   	push   %ebx$/;"	l
 c7	grep.asm	/^  c7:	57                   	push   %edi$/;"	l
-c7	hello_test.asm	/^  c7:	57                   	push   %edi$/;"	l
-c7	helloname_test.asm	/^  c7:	57                   	push   %edi$/;"	l
+c7	hello_test.asm	/^  c7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+c7	helloname_test.asm	/^  c7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 c7	kill.asm	/^  c7:	83 c2 01             	add    $0x1,%edx$/;"	l
 c7	ln.asm	/^  c7:	5b                   	pop    %ebx$/;"	l
 c7	seqdec_prio.asm	/^  c7:	57                   	push   %edi$/;"	l
@@ -1352,14 +1411,12 @@ c79	sh.asm	/^     c79:	6a 00                	push   $0x0$/;"	l
 c7a	usertests.asm	/^     c7a:	83 f8 01             	cmp    $0x1,%eax$/;"	l
 c7b	sh.asm	/^     c7b:	e8 2b 01 00 00       	call   dab <read>$/;"	l
 c7d	usertests.asm	/^     c7d:	0f 85 a4 00 00 00    	jne    d27 <preempt+0x127>$/;"	l
+c8	clear.asm	/^  c8:	83 c0 01             	add    $0x1,%eax$/;"	l
 c8	echo.asm	/^  c8:	eb 26                	jmp    f0 <strcmp+0x40>$/;"	l
 c8	forktest.asm	/^  c8:	50                   	push   %eax$/;"	l
 c8	getmaxpid_test.asm	/^  c8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
-c8	getnumproc_test.asm	/^  c8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
-c8	getprocinfo_test.asm	/^  c8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+c8	getprocinfo_test.asm	/^  c8:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 c8	grep.asm	/^  c8:	56                   	push   %esi$/;"	l
-c8	hello_test.asm	/^  c8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
-c8	helloname_test.asm	/^  c8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
 c8	init.asm	/^  c8:	50                   	push   %eax$/;"	l
 c8	ln.asm	/^  c8:	5d                   	pop    %ebp$/;"	l
 c8	mkdir.asm	/^  c8:	eb 26                	jmp    f0 <strcmp+0x40>$/;"	l
@@ -1378,7 +1435,7 @@ c89	usertests.asm	/^     c89:	e8 1d 2d 00 00       	call   39ab <close>$/;"	l
 c8b	sh.asm	/^     c8b:	83 c7 01             	add    $0x1,%edi$/;"	l
 c8e	sh.asm	/^     c8e:	88 47 ff             	mov    %al,-0x1(%edi)$/;"	l
 c8e	usertests.asm	/^     c8e:	83 c4 10             	add    $0x10,%esp$/;"	l
-c9	forktest.asm	/^  c9:	68 86 04 00 00       	push   $0x486$/;"	l
+c9	forktest.asm	/^  c9:	68 ae 04 00 00       	push   $0x4ae$/;"	l
 c9	grep.asm	/^  c9:	53                   	push   %ebx$/;"	l
 c9	init.asm	/^  c9:	6a 01                	push   $0x1$/;"	l
 c9	ln.asm	/^  c9:	c3                   	ret    $/;"	l
@@ -1404,7 +1461,7 @@ ca	ln.asm	/^  ca:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ca	ls.asm	/^  ca:	89 c6                	mov    %eax,%esi$/;"	l
 ca	mkdir.asm	/^  ca:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ca	rm.asm	/^  ca:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
-ca	sh.asm	/^      ca:	68 43 19 00 00       	push   $0x1943$/;"	l
+ca	sh.asm	/^      ca:	68 63 19 00 00       	push   $0x1963$/;"	l
 ca	stressfs.asm	/^  ca:	83 eb 01             	sub    $0x1,%ebx$/;"	l
 ca1	sh.asm	/^     ca1:	7c cd                	jl     c70 <gets+0x20>$/;"	l
 ca3	sh.asm	/^     ca3:	89 f3                	mov    %esi,%ebx$/;"	l
@@ -1413,15 +1470,13 @@ ca5	sh.asm	/^     ca5:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
 ca6	usertests.asm	/^     ca6:	68 00 20 00 00       	push   $0x2000$/;"	l
 ca8	sh.asm	/^     ca8:	c6 03 00             	movb   $0x0,(%ebx)$/;"	l
 cab	sh.asm	/^     cab:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
-cab	usertests.asm	/^     cab:	68 c0 86 00 00       	push   $0x86c0$/;"	l
+cab	usertests.asm	/^     cab:	68 e0 86 00 00       	push   $0x86e0$/;"	l
 cae	sh.asm	/^     cae:	5b                   	pop    %ebx$/;"	l
 caf	sh.asm	/^     caf:	5e                   	pop    %esi$/;"	l
 cat	cat.c	/^cat(int fd)$/;"	f	typeref:typename:void
+cb	clear.asm	/^  cb:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)$/;"	l
 cb	getmaxpid_test.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
-cb	getnumproc_test.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
-cb	getprocinfo_test.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
-cb	hello_test.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
-cb	helloname_test.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
+cb	getprocinfo_test.asm	/^  cb:	8b 55 0c             	mov    0xc(%ebp),%edx$/;"	l
 cb	init.asm	/^  cb:	6a 01                	push   $0x1$/;"	l
 cb	seqdec_prio.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
 cb	seqinc_prio.asm	/^  cb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
@@ -1442,6 +1497,7 @@ cbb	usertests.asm	/^     cbb:	83 f8 01             	cmp    $0x1,%eax$/;"	l
 cbe	sh.asm	/^     cbe:	01 de                	add    %ebx,%esi$/;"	l
 cbe	usertests.asm	/^     cbe:	75 7e                	jne    d3e <preempt+0x13e>$/;"	l
 cc	cat.asm	/^    cc = read(0, &c, 1);$/;"	d
+cc	clear.asm	/^    cc = read(0, &c, 1);$/;"	d
 cc	echo.asm	/^    cc = read(0, &c, 1);$/;"	d
 cc	forktest.asm	/^    cc = read(0, &c, 1);$/;"	d
 cc	getmaxpid_test.asm	/^    cc = read(0, &c, 1);$/;"	d
@@ -1482,16 +1538,16 @@ ccb	usertests.asm	/^     ccb:	58                   	pop    %eax$/;"	l
 ccc	sh.asm	/^     ccc:	c3                   	ret    $/;"	l
 ccc	usertests.asm	/^     ccc:	5a                   	pop    %edx$/;"	l
 ccd	sh.asm	/^     ccd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-ccd	usertests.asm	/^     ccd:	68 0d 42 00 00       	push   $0x420d$/;"	l
+ccd	usertests.asm	/^     ccd:	68 2d 42 00 00       	push   $0x422d$/;"	l
 cd	cat.asm	/^  cd:	89 c3                	mov    %eax,%ebx$/;"	l
 cd	grep.asm	/^  cd:	8b 5d 08             	mov    0x8(%ebp),%ebx$/;"	l
-cd	init.asm	/^  cd:	68 18 08 00 00       	push   $0x818$/;"	l
+cd	init.asm	/^  cd:	68 38 08 00 00       	push   $0x838$/;"	l
 cd	kill.asm	/^  cd:	84 c0                	test   %al,%al$/;"	l
 cd	stressfs.asm	/^  cd:	75 e9                	jne    b8 <main+0xb8>$/;"	l
 cd0	sh.asm	/^     cd0:	f3 0f 1e fb          	endbr32 $/;"	l
 cd2	usertests.asm	/^     cd2:	6a 01                	push   $0x1$/;"	l
 cd4	sh.asm	/^     cd4:	55                   	push   %ebp$/;"	l
-cd4	usertests.asm	/^     cd4:	e8 07 2e 00 00       	call   3ae0 <printf>$/;"	l
+cd4	usertests.asm	/^     cd4:	e8 27 2e 00 00       	call   3b00 <printf>$/;"	l
 cd5	sh.asm	/^     cd5:	89 e5                	mov    %esp,%ebp$/;"	l
 cd7	sh.asm	/^     cd7:	56                   	push   %esi$/;"	l
 cd8	sh.asm	/^     cd8:	53                   	push   %ebx$/;"	l
@@ -1502,10 +1558,10 @@ cdc	usertests.asm	/^     cdc:	e8 d2 2c 00 00       	call   39b3 <kill>$/;"	l
 cde	sh.asm	/^     cde:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
 ce	forktest.asm	/^  ce:	6a 01                	push   $0x1$/;"	l
 ce	getmaxpid_test.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
-ce	getnumproc_test.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
-ce	getprocinfo_test.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
-ce	hello_test.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
-ce	helloname_test.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
+ce	getnumproc_test.asm	/^  ce:	66 90                	xchg   %ax,%ax$/;"	l
+ce	getprocinfo_test.asm	/^  ce:	0f b6 01             	movzbl (%ecx),%eax$/;"	l
+ce	hello_test.asm	/^  ce:	66 90                	xchg   %ax,%ax$/;"	l
+ce	helloname_test.asm	/^  ce:	66 90                	xchg   %ax,%ax$/;"	l
 ce	seqdec_prio.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
 ce	seqinc_prio.asm	/^  ce:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
 ce1	sh.asm	/^     ce1:	e8 ed 00 00 00       	call   dd3 <open>$/;"	l
@@ -1518,19 +1574,20 @@ ceb	sh.asm	/^     ceb:	78 2b                	js     d18 <stat+0x48>$/;"	l
 cec	usertests.asm	/^     cec:	e8 c2 2c 00 00       	call   39b3 <kill>$/;"	l
 ced	sh.asm	/^     ced:	83 ec 08             	sub    $0x8,%esp$/;"	l
 cf	cat.asm	/^  cf:	85 c0                	test   %eax,%eax$/;"	l
+cf	clear.asm	/^  cf:	89 c1                	mov    %eax,%ecx$/;"	l
 cf	kill.asm	/^  cf:	74 0f                	je     e0 <strcmp+0x40>$/;"	l
-cf	sh.asm	/^      cf:	68 01 13 00 00       	push   $0x1301$/;"	l
+cf	sh.asm	/^      cf:	68 21 13 00 00       	push   $0x1321$/;"	l
 cf	stressfs.asm	/^  cf:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 cf	zombie.asm	/^  cf:	89 c1                	mov    %eax,%ecx$/;"	l
 cf0	sh.asm	/^     cf0:	ff 75 0c             	pushl  0xc(%ebp)$/;"	l
 cf1	usertests.asm	/^     cf1:	59                   	pop    %ecx$/;"	l
 cf2	usertests.asm	/^     cf2:	5b                   	pop    %ebx$/;"	l
 cf3	sh.asm	/^     cf3:	89 c3                	mov    %eax,%ebx$/;"	l
-cf3	usertests.asm	/^     cf3:	68 16 42 00 00       	push   $0x4216$/;"	l
+cf3	usertests.asm	/^     cf3:	68 36 42 00 00       	push   $0x4236$/;"	l
 cf5	sh.asm	/^     cf5:	50                   	push   %eax$/;"	l
 cf6	sh.asm	/^     cf6:	e8 f0 00 00 00       	call   deb <fstat>$/;"	l
 cf8	usertests.asm	/^     cf8:	6a 01                	push   $0x1$/;"	l
-cfa	usertests.asm	/^     cfa:	e8 e1 2d 00 00       	call   3ae0 <printf>$/;"	l
+cfa	usertests.asm	/^     cfa:	e8 01 2e 00 00       	call   3b00 <printf>$/;"	l
 cfb	sh.asm	/^     cfb:	89 1c 24             	mov    %ebx,(%esp)$/;"	l
 cfe	sh.asm	/^     cfe:	89 c6                	mov    %eax,%esi$/;"	l
 cff	usertests.asm	/^     cff:	e8 87 2c 00 00       	call   398b <wait>$/;"	l
@@ -1589,24 +1646,24 @@ crt	console.c	/^static ushort *crt = (ushort*)P2V(0xb8000);  \/\/ CGA memory$/;"
 cs	mmu.h	/^  uint cs : 16;         \/\/ code segment selector$/;"	m	struct:gatedesc	typeref:typename:uint:16
 cs	mmu.h	/^  ushort cs;$/;"	m	struct:taskstate	typeref:typename:ushort
 cs	x86.h	/^  ushort cs;$/;"	m	struct:trapframe	typeref:typename:ushort
+cscount	proc.h	/^	int cscount;								 \/\/ +1 when context switch$/;"	m	struct:proc	typeref:typename:int
 ctlmap	kbd.h	/^static uchar ctlmap[256] =$/;"	v	typeref:typename:uchar[256]
 cwd	proc.h	/^  struct inode *cwd;           \/\/ Current directory$/;"	m	struct:proc	typeref:struct:inode *
 d	getmaxpid_test.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
-d	getnumproc_test.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
-d	getprocinfo_test.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
-d	hello_test.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
-d	helloname_test.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
 d	kernel.asm	/^  d = dst;$/;"	d
 d	seqdec_prio.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
 d	seqinc_prio.asm	/^   d:	8b 5d 0c             	mov    0xc(%ebp),%ebx$/;"	l
 d0	echo.asm	/^  d0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
 d0	forktest.asm	/^  d0:	e8 fe 02 00 00       	call   3d3 <write>$/;"	l
+d0	getnumproc_test.asm	/^  d0:	31 c9                	xor    %ecx,%ecx$/;"	l
 d0	grep.asm	/^  d0:	8b 75 0c             	mov    0xc(%ebp),%esi$/;"	l
+d0	hello_test.asm	/^  d0:	31 c9                	xor    %ecx,%ecx$/;"	l
+d0	helloname_test.asm	/^  d0:	f3 0f 1e fb          	endbr32 $/;"	l
 d0	ln.asm	/^  d0:	31 c0                	xor    %eax,%eax$/;"	l
 d0	mkdir.asm	/^  d0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
 d0	rm.asm	/^  d0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
 d0	usertests.asm	/^      d0:	e8 8b 0c 00 00       	call   d60 <exitwait>$/;"	l
-d0	wc.asm	/^  d0:	68 00 0c 00 00       	push   $0xc00$/;"	l
+d0	wc.asm	/^  d0:	68 20 0c 00 00       	push   $0xc20$/;"	l
 d00	sh.asm	/^     d00:	e8 b6 00 00 00       	call   dbb <close>$/;"	l
 d04	usertests.asm	/^     d04:	e8 82 2c 00 00       	call   398b <wait>$/;"	l
 d05	sh.asm	/^     d05:	83 c4 10             	add    $0x10,%esp$/;"	l
@@ -1619,26 +1676,26 @@ d0e	usertests.asm	/^     d0e:	5e                   	pop    %esi$/;"	l
 d0f	sh.asm	/^     d0f:	5d                   	pop    %ebp$/;"	l
 d0f	usertests.asm	/^     d0f:	5f                   	pop    %edi$/;"	l
 d1	cat.asm	/^  d1:	7f cd                	jg     a0 <cat+0x10>$/;"	l
+d1	clear.asm	/^  d1:	75 f5                	jne    c8 <strlen+0x18>$/;"	l
 d1	getmaxpid_test.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
-d1	getnumproc_test.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
-d1	getprocinfo_test.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
-d1	hello_test.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
-d1	helloname_test.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
+d1	getprocinfo_test.asm	/^  d1:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 d1	kill.asm	/^  d1:	38 d8                	cmp    %bl,%al$/;"	l
 d1	ls.asm	/^  d1:	ba 0e 00 00 00       	mov    $0xe,%edx$/;"	l
 d1	seqdec_prio.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
 d1	seqinc_prio.asm	/^  d1:	89 d7                	mov    %edx,%edi$/;"	l
 d1	zombie.asm	/^  d1:	75 f5                	jne    c8 <strlen+0x18>$/;"	l
 d10	sh.asm	/^     d10:	c3                   	ret    $/;"	l
-d10	usertests.asm	/^     d10:	68 1f 42 00 00       	push   $0x421f$/;"	l
+d10	usertests.asm	/^     d10:	68 3f 42 00 00       	push   $0x423f$/;"	l
 d11	sh.asm	/^     d11:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 d15	usertests.asm	/^     d15:	6a 01                	push   $0x1$/;"	l
-d17	usertests.asm	/^     d17:	e8 c4 2d 00 00       	call   3ae0 <printf>$/;"	l
+d17	usertests.asm	/^     d17:	e8 e4 2d 00 00       	call   3b00 <printf>$/;"	l
 d18	sh.asm	/^     d18:	be ff ff ff ff       	mov    $0xffffffff,%esi$/;"	l
 d1c	usertests.asm	/^     d1c:	83 c4 10             	add    $0x10,%esp$/;"	l
 d1d	sh.asm	/^     d1d:	eb e9                	jmp    d08 <stat+0x38>$/;"	l
 d1f	sh.asm	/^     d1f:	90                   	nop$/;"	l
 d1f	usertests.asm	/^     d1f:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
+d2	getnumproc_test.asm	/^  d2:	5d                   	pop    %ebp$/;"	l
+d2	hello_test.asm	/^  d2:	5d                   	pop    %ebp$/;"	l
 d2	init.asm	/^  d2:	e8 c4 02 00 00       	call   39b <mknod>$/;"	l
 d2	ln.asm	/^  d2:	29 d8                	sub    %ebx,%eax$/;"	l
 d2	stressfs.asm	/^  d2:	57                   	push   %edi$/;"	l
@@ -1653,24 +1710,23 @@ d26	usertests.asm	/^     d26:	c3                   	ret    $/;"	l
 d27	sh.asm	/^     d27:	53                   	push   %ebx$/;"	l
 d27	usertests.asm	/^     d27:	83 ec 08             	sub    $0x8,%esp$/;"	l
 d28	sh.asm	/^     d28:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
-d2a	usertests.asm	/^     d2a:	68 e6 41 00 00       	push   $0x41e6$/;"	l
+d2a	usertests.asm	/^     d2a:	68 06 42 00 00       	push   $0x4206$/;"	l
 d2b	sh.asm	/^     d2b:	0f be 02             	movsbl (%edx),%eax$/;"	l
 d2e	sh.asm	/^     d2e:	8d 48 d0             	lea    -0x30(%eax),%ecx$/;"	l
 d2f	usertests.asm	/^     d2f:	6a 01                	push   $0x1$/;"	l
 d3	cat.asm	/^  d3:	75 1b                	jne    f0 <cat+0x60>$/;"	l
+d3	clear.asm	/^  d3:	89 c8                	mov    %ecx,%eax$/;"	l
 d3	getmaxpid_test.asm	/^  d3:	fc                   	cld    $/;"	l
-d3	getnumproc_test.asm	/^  d3:	fc                   	cld    $/;"	l
-d3	getprocinfo_test.asm	/^  d3:	fc                   	cld    $/;"	l
+d3	getnumproc_test.asm	/^  d3:	89 c8                	mov    %ecx,%eax$/;"	l
 d3	grep.asm	/^  d3:	8b 7d 10             	mov    0x10(%ebp),%edi$/;"	l
-d3	hello_test.asm	/^  d3:	fc                   	cld    $/;"	l
-d3	helloname_test.asm	/^  d3:	fc                   	cld    $/;"	l
+d3	hello_test.asm	/^  d3:	89 c8                	mov    %ecx,%eax$/;"	l
 d3	kill.asm	/^  d3:	74 eb                	je     c0 <strcmp+0x20>$/;"	l
 d3	seqdec_prio.asm	/^  d3:	fc                   	cld    $/;"	l
 d3	seqinc_prio.asm	/^  d3:	fc                   	cld    $/;"	l
 d3	stressfs.asm	/^  d3:	e8 f3 02 00 00       	call   3cb <close>$/;"	l
 d3	zombie.asm	/^  d3:	89 c8                	mov    %ecx,%eax$/;"	l
 d31	sh.asm	/^     d31:	80 f9 09             	cmp    $0x9,%cl$/;"	l
-d31	usertests.asm	/^     d31:	e8 aa 2d 00 00       	call   3ae0 <printf>$/;"	l
+d31	usertests.asm	/^     d31:	e8 ca 2d 00 00       	call   3b00 <printf>$/;"	l
 d34	sh.asm	/^     d34:	b9 00 00 00 00       	mov    $0x0,%ecx$/;"	l
 d36	usertests.asm	/^     d36:	83 c4 10             	add    $0x10,%esp$/;"	l
 d39	sh.asm	/^     d39:	77 1a                	ja     d55 <atoi+0x35>$/;"	l
@@ -1680,10 +1736,8 @@ d3e	usertests.asm	/^     d3e:	83 ec 08             	sub    $0x8,%esp$/;"	l
 d3f	sh.asm	/^     d3f:	90                   	nop$/;"	l
 d4	echo.asm	/^  d4:	83 c1 01             	add    $0x1,%ecx$/;"	l
 d4	getmaxpid_test.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
-d4	getnumproc_test.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
-d4	getprocinfo_test.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
-d4	hello_test.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
-d4	helloname_test.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
+d4	getprocinfo_test.asm	/^  d4:	84 c0                	test   %al,%al$/;"	l
+d4	helloname_test.asm	/^  d4:	55                   	push   %ebp$/;"	l
 d4	ln.asm	/^  d4:	5b                   	pop    %ebx$/;"	l
 d4	mkdir.asm	/^  d4:	83 c1 01             	add    $0x1,%ecx$/;"	l
 d4	rm.asm	/^  d4:	83 c1 01             	add    $0x1,%ecx$/;"	l
@@ -1691,16 +1745,20 @@ d4	seqdec_prio.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
 d4	seqinc_prio.asm	/^  d4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
 d4	sh.asm	/^      d4:	6a 02                	push   $0x2$/;"	l
 d40	sh.asm	/^     d40:	83 c2 01             	add    $0x1,%edx$/;"	l
-d41	usertests.asm	/^     d41:	68 fa 41 00 00       	push   $0x41fa$/;"	l
+d41	usertests.asm	/^     d41:	68 1a 42 00 00       	push   $0x421a$/;"	l
 d43	sh.asm	/^     d43:	8d 0c 89             	lea    (%ecx,%ecx,4),%ecx$/;"	l
 d46	sh.asm	/^     d46:	8d 4c 48 d0          	lea    -0x30(%eax,%ecx,2),%ecx$/;"	l
 d46	usertests.asm	/^     d46:	6a 01                	push   $0x1$/;"	l
-d48	usertests.asm	/^     d48:	e8 93 2d 00 00       	call   3ae0 <printf>$/;"	l
+d48	usertests.asm	/^     d48:	e8 b3 2d 00 00       	call   3b00 <printf>$/;"	l
 d4a	sh.asm	/^     d4a:	0f be 02             	movsbl (%edx),%eax$/;"	l
 d4d	sh.asm	/^     d4d:	8d 58 d0             	lea    -0x30(%eax),%ebx$/;"	l
 d4d	usertests.asm	/^     d4d:	83 c4 10             	add    $0x10,%esp$/;"	l
 d5	cat.asm	/^  d5:	8d 65 f8             	lea    -0x8(%ebp),%esp$/;"	l
+d5	clear.asm	/^  d5:	5d                   	pop    %ebp$/;"	l
 d5	forktest.asm	/^  d5:	8b 5d fc             	mov    -0x4(%ebp),%ebx$/;"	l
+d5	getnumproc_test.asm	/^  d5:	c3                   	ret    $/;"	l
+d5	hello_test.asm	/^  d5:	c3                   	ret    $/;"	l
+d5	helloname_test.asm	/^  d5:	89 e5                	mov    %esp,%ebp$/;"	l
 d5	kill.asm	/^  d5:	29 d8                	sub    %ebx,%eax$/;"	l
 d5	ln.asm	/^  d5:	5d                   	pop    %ebp$/;"	l
 d5	usertests.asm	/^      d5:	e8 a6 27 00 00       	call   2880 <rmdot>$/;"	l
@@ -1716,17 +1774,17 @@ d58	sh.asm	/^     d58:	5d                   	pop    %ebp$/;"	l
 d59	sh.asm	/^     d59:	c3                   	ret    $/;"	l
 d59	usertests.asm	/^     d59:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 d5a	sh.asm	/^     d5a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+d6	clear.asm	/^  d6:	c3                   	ret    $/;"	l
 d6	getmaxpid_test.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
-d6	getnumproc_test.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
-d6	getprocinfo_test.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
+d6	getnumproc_test.asm	/^  d6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+d6	getprocinfo_test.asm	/^  d6:	75 19                	jne    f1 <strcmp+0x31>$/;"	l
 d6	grep.asm	/^  d6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-d6	hello_test.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
-d6	helloname_test.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
+d6	hello_test.asm	/^  d6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 d6	ln.asm	/^  d6:	c3                   	ret    $/;"	l
 d6	ls.asm	/^  d6:	83 c4 0c             	add    $0xc,%esp$/;"	l
 d6	seqdec_prio.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
 d6	seqinc_prio.asm	/^  d6:	89 d0                	mov    %edx,%eax$/;"	l
-d6	sh.asm	/^      d6:	e8 15 0e 00 00       	call   ef0 <printf>$/;"	l
+d6	sh.asm	/^      d6:	e8 35 0e 00 00       	call   f10 <printf>$/;"	l
 d6	zombie.asm	/^  d6:	c3                   	ret    $/;"	l
 d60	sh.asm	/^     d60:	f3 0f 1e fb          	endbr32 $/;"	l
 d60	usertests.asm	/^     d60:	f3 0f 1e fb          	endbr32 $/;"	l
@@ -1743,7 +1801,9 @@ d6d	usertests.asm	/^     d6d:	53                   	push   %ebx$/;"	l
 d6e	sh.asm	/^     d6e:	56                   	push   %esi$/;"	l
 d6e	usertests.asm	/^     d6e:	eb 10                	jmp    d80 <exitwait+0x20>$/;"	l
 d6f	sh.asm	/^     d6f:	8b 75 0c             	mov    0xc(%ebp),%esi$/;"	l
+d7	clear.asm	/^  d7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 d7	echo.asm	/^  d7:	83 c2 01             	add    $0x1,%edx$/;"	l
+d7	helloname_test.asm	/^  d7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
 d7	init.asm	/^  d7:	58                   	pop    %eax$/;"	l
 d7	kill.asm	/^  d7:	5b                   	pop    %ebx$/;"	l
 d7	ln.asm	/^  d7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
@@ -1764,10 +1824,7 @@ d7e	usertests.asm	/^     d7e:	74 41                	je     dc1 <exitwait+0x61>$/
 d8	cat.asm	/^  d8:	5b                   	pop    %ebx$/;"	l
 d8	forktest.asm	/^  d8:	c9                   	leave  $/;"	l
 d8	getmaxpid_test.asm	/^  d8:	5f                   	pop    %edi$/;"	l
-d8	getnumproc_test.asm	/^  d8:	5f                   	pop    %edi$/;"	l
-d8	getprocinfo_test.asm	/^  d8:	5f                   	pop    %edi$/;"	l
-d8	hello_test.asm	/^  d8:	5f                   	pop    %edi$/;"	l
-d8	helloname_test.asm	/^  d8:	5f                   	pop    %edi$/;"	l
+d8	getprocinfo_test.asm	/^  d8:	eb 26                	jmp    100 <strcmp+0x40>$/;"	l
 d8	init.asm	/^  d8:	5a                   	pop    %edx$/;"	l
 d8	kill.asm	/^  d8:	5d                   	pop    %ebp$/;"	l
 d8	seqdec_prio.asm	/^  d8:	5f                   	pop    %edi$/;"	l
@@ -1788,14 +1845,10 @@ d89	usertests.asm	/^     d89:	79 e5                	jns    d70 <exitwait+0x10>$/
 d8a	sh.asm	/^     d8a:	c3                   	ret    $/;"	l
 d8b	sh.asm	/^     d8b:	b8 01 00 00 00       	mov    $0x1,%eax$/;"	l
 d8b	usertests.asm	/^     d8b:	83 ec 08             	sub    $0x8,%esp$/;"	l
-d8e	usertests.asm	/^     d8e:	68 89 4d 00 00       	push   $0x4d89$/;"	l
+d8e	usertests.asm	/^     d8e:	68 a9 4d 00 00       	push   $0x4da9$/;"	l
 d9	cat.asm	/^  d9:	5e                   	pop    %esi$/;"	l
 d9	forktest.asm	/^  d9:	c3                   	ret    $/;"	l
 d9	getmaxpid_test.asm	/^  d9:	5d                   	pop    %ebp$/;"	l
-d9	getnumproc_test.asm	/^  d9:	5d                   	pop    %ebp$/;"	l
-d9	getprocinfo_test.asm	/^  d9:	5d                   	pop    %ebp$/;"	l
-d9	hello_test.asm	/^  d9:	5d                   	pop    %ebp$/;"	l
-d9	helloname_test.asm	/^  d9:	5d                   	pop    %ebp$/;"	l
 d9	init.asm	/^  d9:	6a 02                	push   $0x2$/;"	l
 d9	kill.asm	/^  d9:	c3                   	ret    $/;"	l
 d9	ls.asm	/^  d9:	29 f2                	sub    %esi,%edx$/;"	l
@@ -1806,7 +1859,7 @@ d90	sh.asm	/^     d90:	cd 40                	int    $0x40$/;"	l
 d92	sh.asm	/^     d92:	c3                   	ret    $/;"	l
 d93	sh.asm	/^     d93:	b8 02 00 00 00       	mov    $0x2,%eax$/;"	l
 d93	usertests.asm	/^     d93:	6a 01                	push   $0x1$/;"	l
-d95	usertests.asm	/^     d95:	e8 46 2d 00 00       	call   3ae0 <printf>$/;"	l
+d95	usertests.asm	/^     d95:	e8 66 2d 00 00       	call   3b00 <printf>$/;"	l
 d98	sh.asm	/^     d98:	cd 40                	int    $0x40$/;"	l
 d9a	sh.asm	/^     d9a:	c3                   	ret    $/;"	l
 d9a	usertests.asm	/^     d9a:	83 c4 10             	add    $0x10,%esp$/;"	l
@@ -1816,16 +1869,14 @@ da	cat.asm	/^  da:	5d                   	pop    %ebp$/;"	l
 da	echo.asm	/^  da:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 da	forktest.asm	/^  da:	e8 d4 02 00 00       	call   3b3 <exit>$/;"	l
 da	getmaxpid_test.asm	/^  da:	c3                   	ret    $/;"	l
-da	getnumproc_test.asm	/^  da:	c3                   	ret    $/;"	l
-da	getprocinfo_test.asm	/^  da:	c3                   	ret    $/;"	l
-da	hello_test.asm	/^  da:	c3                   	ret    $/;"	l
-da	helloname_test.asm	/^  da:	c3                   	ret    $/;"	l
+da	getprocinfo_test.asm	/^  da:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+da	helloname_test.asm	/^  da:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
 da	kill.asm	/^  da:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 da	mkdir.asm	/^  da:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 da	rm.asm	/^  da:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 da	seqdec_prio.asm	/^  da:	c3                   	ret    $/;"	l
 da	seqinc_prio.asm	/^  da:	c3                   	ret    $/;"	l
-da	stressfs.asm	/^  da:	68 85 08 00 00       	push   $0x885$/;"	l
+da	stressfs.asm	/^  da:	68 a5 08 00 00       	push   $0x8a5$/;"	l
 da	usertests.asm	/^      da:	e8 61 26 00 00       	call   2740 <fourteen>$/;"	l
 da0	sh.asm	/^     da0:	cd 40                	int    $0x40$/;"	l
 da0	usertests.asm	/^     da0:	5b                   	pop    %ebx$/;"	l
@@ -1839,7 +1890,7 @@ da8	sh.asm	/^     da8:	cd 40                	int    $0x40$/;"	l
 da8	usertests.asm	/^     da8:	83 ec 08             	sub    $0x8,%esp$/;"	l
 daa	sh.asm	/^     daa:	c3                   	ret    $/;"	l
 dab	sh.asm	/^     dab:	b8 05 00 00 00       	mov    $0x5,%eax$/;"	l
-dab	usertests.asm	/^     dab:	68 2b 42 00 00       	push   $0x422b$/;"	l
+dab	usertests.asm	/^     dab:	68 4b 42 00 00       	push   $0x424b$/;"	l
 data	buf.h	/^  uchar data[BSIZE];$/;"	m	struct:buf	typeref:typename:uchar[]
 data	ioapic.c	/^  uint data;$/;"	m	struct:ioapic	typeref:typename:uint	file:
 data	kernel.asm	/^    data = (shift & E0ESC ? data : data & 0x7F);$/;"	d
@@ -1849,12 +1900,8 @@ data	pipe.c	/^  char data[PIPESIZE];$/;"	m	struct:pipe	typeref:typename:char[]	f
 day	date.h	/^  uint day;$/;"	m	struct:rtcdate	typeref:typename:uint
 db	cat.asm	/^  db:	c3                   	ret    $/;"	l
 db	getmaxpid_test.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-db	getnumproc_test.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-db	getprocinfo_test.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-db	hello_test.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-db	helloname_test.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-db	init.asm	/^  db:	68 18 08 00 00       	push   $0x818$/;"	l
-db	ls.asm	/^  db:	05 e4 0d 00 00       	add    $0xde4,%eax$/;"	l
+db	init.asm	/^  db:	68 38 08 00 00       	push   $0x838$/;"	l
+db	ls.asm	/^  db:	05 04 0e 00 00       	add    $0xe04,%eax$/;"	l
 db	mmu.h	/^  uint db : 1;         \/\/ 0 = 16-bit segment, 1 = 32-bit segment$/;"	m	struct:segdesc	typeref:typename:uint:1
 db	seqdec_prio.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 db	seqinc_prio.asm	/^  db:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
@@ -1862,7 +1909,7 @@ db	sh.asm	/^      db:	83 c4 10             	add    $0x10,%esp$/;"	l
 db0	sh.asm	/^     db0:	cd 40                	int    $0x40$/;"	l
 db0	usertests.asm	/^     db0:	6a 01                	push   $0x1$/;"	l
 db2	sh.asm	/^     db2:	c3                   	ret    $/;"	l
-db2	usertests.asm	/^     db2:	e8 29 2d 00 00       	call   3ae0 <printf>$/;"	l
+db2	usertests.asm	/^     db2:	e8 49 2d 00 00       	call   3b00 <printf>$/;"	l
 db3	sh.asm	/^     db3:	b8 10 00 00 00       	mov    $0x10,%eax$/;"	l
 db7	usertests.asm	/^     db7:	83 c4 10             	add    $0x10,%esp$/;"	l
 db8	sh.asm	/^     db8:	cd 40                	int    $0x40$/;"	l
@@ -1878,14 +1925,17 @@ dc0	usertests.asm	/^     dc0:	c3                   	ret    $/;"	l
 dc1	usertests.asm	/^     dc1:	83 ec 08             	sub    $0x8,%esp$/;"	l
 dc2	sh.asm	/^     dc2:	c3                   	ret    $/;"	l
 dc3	sh.asm	/^     dc3:	b8 06 00 00 00       	mov    $0x6,%eax$/;"	l
-dc4	usertests.asm	/^     dc4:	68 3b 42 00 00       	push   $0x423b$/;"	l
+dc4	usertests.asm	/^     dc4:	68 5b 42 00 00       	push   $0x425b$/;"	l
 dc8	sh.asm	/^     dc8:	cd 40                	int    $0x40$/;"	l
 dc9	usertests.asm	/^     dc9:	6a 01                	push   $0x1$/;"	l
 dca	sh.asm	/^     dca:	c3                   	ret    $/;"	l
 dcb	sh.asm	/^     dcb:	b8 07 00 00 00       	mov    $0x7,%eax$/;"	l
-dcb	usertests.asm	/^     dcb:	e8 10 2d 00 00       	call   3ae0 <printf>$/;"	l
+dcb	usertests.asm	/^     dcb:	e8 30 2d 00 00       	call   3b00 <printf>$/;"	l
 dd	echo.asm	/^  dd:	84 c0                	test   %al,%al$/;"	l
+dd	getnumproc_test.asm	/^  dd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
 dd	grep.asm	/^  dd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
+dd	hello_test.asm	/^  dd:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
+dd	helloname_test.asm	/^  dd:	74 21                	je     100 <strlen+0x30>$/;"	l
 dd	mkdir.asm	/^  dd:	84 c0                	test   %al,%al$/;"	l
 dd	rm.asm	/^  dd:	84 c0                	test   %al,%al$/;"	l
 dd	wc.asm	/^  dd:	83 c4 10             	add    $0x10,%esp$/;"	l
@@ -1903,6 +1953,7 @@ dda	sh.asm	/^     dda:	c3                   	ret    $/;"	l
 dda	usertests.asm	/^     dda:	e8 a4 2b 00 00       	call   3983 <exit>$/;"	l
 ddb	sh.asm	/^     ddb:	b8 11 00 00 00       	mov    $0x11,%eax$/;"	l
 ddf	usertests.asm	/^     ddf:	90                   	nop$/;"	l
+de	clear.asm	/^  de:	66 90                	xchg   %ax,%ax$/;"	l
 de	ln.asm	/^  de:	66 90                	xchg   %ax,%ax$/;"	l
 de	sh.asm	/^      de:	eb 93                	jmp    73 <main+0x73>$/;"	l
 de	zombie.asm	/^  de:	66 90                	xchg   %ax,%ax$/;"	l
@@ -1920,7 +1971,7 @@ dea	usertests.asm	/^     dea:	53                   	push   %ebx$/;"	l
 deallocuvm	vm.c	/^deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)$/;"	f	typeref:typename:int
 deb	sh.asm	/^     deb:	b8 08 00 00 00       	mov    $0x8,%eax$/;"	l
 deb	usertests.asm	/^     deb:	83 ec 08             	sub    $0x8,%esp$/;"	l
-dee	usertests.asm	/^     dee:	68 48 42 00 00       	push   $0x4248$/;"	l
+dee	usertests.asm	/^     dee:	68 68 42 00 00       	push   $0x4268$/;"	l
 default	kernel.asm	/^    default:$/;"	l
 default	kernel.asm	/^  default:$/;"	l
 dev	buf.h	/^  uint dev;$/;"	m	struct:buf	typeref:typename:uint
@@ -1929,14 +1980,11 @@ dev	log.c	/^  int dev;$/;"	m	struct:log	typeref:typename:int	file:
 dev	stat.h	/^  int dev;     \/\/ File system's disk device$/;"	m	struct:stat	typeref:typename:int
 devsw	file.c	/^struct devsw devsw[NDEV];$/;"	v	typeref:struct:devsw[]
 devsw	file.h	/^struct devsw {$/;"	s
-df	cat.asm	/^  df:	68 38 08 00 00       	push   $0x838$/;"	l
+df	cat.asm	/^  df:	68 58 08 00 00       	push   $0x858$/;"	l
 df	echo.asm	/^  df:	74 0f                	je     f0 <strcmp+0x40>$/;"	l
 df	forktest.asm	/^  df:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 df	getmaxpid_test.asm	/^  df:	90                   	nop$/;"	l
-df	getnumproc_test.asm	/^  df:	90                   	nop$/;"	l
-df	getprocinfo_test.asm	/^  df:	90                   	nop$/;"	l
-df	hello_test.asm	/^  df:	90                   	nop$/;"	l
-df	helloname_test.asm	/^  df:	90                   	nop$/;"	l
+df	helloname_test.asm	/^  df:	31 c0                	xor    %eax,%eax$/;"	l
 df	mkdir.asm	/^  df:	74 0f                	je     f0 <strcmp+0x40>$/;"	l
 df	rm.asm	/^  df:	74 0f                	je     f0 <strcmp+0x40>$/;"	l
 df	seqdec_prio.asm	/^  df:	90                   	nop$/;"	l
@@ -1947,7 +1995,7 @@ df0	sh.asm	/^     df0:	cd 40                	int    $0x40$/;"	l
 df2	sh.asm	/^     df2:	c3                   	ret    $/;"	l
 df3	sh.asm	/^     df3:	b8 13 00 00 00       	mov    $0x13,%eax$/;"	l
 df3	usertests.asm	/^     df3:	6a 01                	push   $0x1$/;"	l
-df5	usertests.asm	/^     df5:	e8 e6 2c 00 00       	call   3ae0 <printf>$/;"	l
+df5	usertests.asm	/^     df5:	e8 06 2d 00 00       	call   3b00 <printf>$/;"	l
 df8	sh.asm	/^     df8:	cd 40                	int    $0x40$/;"	l
 dfa	sh.asm	/^     dfa:	c3                   	ret    $/;"	l
 dfa	usertests.asm	/^     dfa:	e8 04 2c 00 00       	call   3a03 <getpid>$/;"	l
@@ -1968,6 +2016,7 @@ dpl	mmu.h	/^  uint dpl : 2;        \/\/ Descriptor Privilege Level$/;"	m	struct:
 ds	mmu.h	/^  ushort ds;$/;"	m	struct:taskstate	typeref:typename:ushort
 ds	x86.h	/^  ushort ds;$/;"	m	struct:trapframe	typeref:typename:ushort
 dst	cat.asm	/^  dst = vdst;$/;"	d
+dst	clear.asm	/^  dst = vdst;$/;"	d
 dst	echo.asm	/^  dst = vdst;$/;"	d
 dst	forktest.asm	/^  dst = vdst;$/;"	d
 dst	getmaxpid_test.asm	/^  dst = vdst;$/;"	d
@@ -1990,9 +2039,12 @@ dst	usertests.asm	/^  dst = vdst;$/;"	d
 dst	wc.asm	/^  dst = vdst;$/;"	d
 dst	zombie.asm	/^  dst = vdst;$/;"	d
 e	cat.asm	/^   e:	55                   	push   %ebp$/;"	l
+e	clear.asm	/^   e:	55                   	push   %ebp$/;"	l
 e	console.c	/^  uint e;  \/\/ Edit index$/;"	m	struct:__anon96a473a90208	typeref:typename:uint	file:
 e	echo.asm	/^   e:	55                   	push   %ebp$/;"	l
+e	getprocinfo_test.asm	/^   e:	55                   	push   %ebp$/;"	l
 e	grep.asm	/^   e:	55                   	push   %ebp$/;"	l
+e	helloname_test.asm	/^   e:	55                   	push   %ebp$/;"	l
 e	init.asm	/^   e:	55                   	push   %ebp$/;"	l
 e	kernel.asm	/^  e = addr+len;$/;"	d
 e	kill.asm	/^   e:	55                   	push   %ebp$/;"	l
@@ -2004,12 +2056,12 @@ e	sh.asm	/^       e:	55                   	push   %ebp$/;"	l
 e	usertests.asm	/^       e:	55                   	push   %ebp$/;"	l
 e	wc.asm	/^   e:	55                   	push   %ebp$/;"	l
 e	zombie.asm	/^   e:	55                   	push   %ebp$/;"	l
+e0	clear.asm	/^  e0:	31 c9                	xor    %ecx,%ecx$/;"	l
 e0	getmaxpid_test.asm	/^  e0:	f3 0f 1e fb          	endbr32 $/;"	l
 e0	getnumproc_test.asm	/^  e0:	f3 0f 1e fb          	endbr32 $/;"	l
-e0	getprocinfo_test.asm	/^  e0:	f3 0f 1e fb          	endbr32 $/;"	l
+e0	getprocinfo_test.asm	/^  e0:	0f b6 41 01          	movzbl 0x1(%ecx),%eax$/;"	l
 e0	grep.asm	/^  e0:	83 ec 08             	sub    $0x8,%esp$/;"	l
 e0	hello_test.asm	/^  e0:	f3 0f 1e fb          	endbr32 $/;"	l
-e0	helloname_test.asm	/^  e0:	f3 0f 1e fb          	endbr32 $/;"	l
 e0	init.asm	/^  e0:	e8 ae 02 00 00       	call   393 <open>$/;"	l
 e0	kill.asm	/^  e0:	31 c0                	xor    %eax,%eax$/;"	l
 e0	ln.asm	/^  e0:	f3 0f 1e fb          	endbr32 $/;"	l
@@ -2031,10 +2083,11 @@ e0b	sh.asm	/^     e0b:	b8 0a 00 00 00       	mov    $0xa,%eax$/;"	l
 e0b	usertests.asm	/^     e0b:	74 0f                	je     e1c <mem+0x3c>$/;"	l
 e0d	usertests.asm	/^     e0d:	e9 8e 00 00 00       	jmp    ea0 <mem+0xc0>$/;"	l
 e1	echo.asm	/^  e1:	38 d8                	cmp    %bl,%al$/;"	l
+e1	helloname_test.asm	/^  e1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 e1	ls.asm	/^  e1:	6a 20                	push   $0x20$/;"	l
 e1	mkdir.asm	/^  e1:	38 d8                	cmp    %bl,%al$/;"	l
 e1	rm.asm	/^  e1:	38 d8                	cmp    %bl,%al$/;"	l
-e1	stressfs.asm	/^  e1:	e8 1a 04 00 00       	call   500 <printf>$/;"	l
+e1	stressfs.asm	/^  e1:	e8 3a 04 00 00       	call   520 <printf>$/;"	l
 e10	sh.asm	/^     e10:	cd 40                	int    $0x40$/;"	l
 e12	sh.asm	/^     e12:	c3                   	ret    $/;"	l
 e12	usertests.asm	/^     e12:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
@@ -2046,20 +2099,22 @@ e1a	usertests.asm	/^     e1a:	89 c6                	mov    %eax,%esi$/;"	l
 e1b	sh.asm	/^     e1b:	b8 0c 00 00 00       	mov    $0xc,%eax$/;"	l
 e1c	usertests.asm	/^     e1c:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 e1f	usertests.asm	/^     e1f:	68 11 27 00 00       	push   $0x2711$/;"	l
-e2	forktest.asm	/^  e2:	68 5f 04 00 00       	push   $0x45f$/;"	l
+e2	clear.asm	/^  e2:	5d                   	pop    %ebp$/;"	l
+e2	forktest.asm	/^  e2:	68 87 04 00 00       	push   $0x487$/;"	l
 e2	kill.asm	/^  e2:	29 d8                	sub    %ebx,%eax$/;"	l
 e2	wc.asm	/^  e2:	85 c0                	test   %eax,%eax$/;"	l
 e2	zombie.asm	/^  e2:	5d                   	pop    %ebp$/;"	l
 e20	sh.asm	/^     e20:	cd 40                	int    $0x40$/;"	l
 e22	sh.asm	/^     e22:	c3                   	ret    $/;"	l
 e23	sh.asm	/^     e23:	b8 0d 00 00 00       	mov    $0xd,%eax$/;"	l
-e24	usertests.asm	/^     e24:	e8 17 2f 00 00       	call   3d40 <malloc>$/;"	l
+e24	usertests.asm	/^     e24:	e8 37 2f 00 00       	call   3d60 <malloc>$/;"	l
 e28	sh.asm	/^     e28:	cd 40                	int    $0x40$/;"	l
 e29	usertests.asm	/^     e29:	83 c4 10             	add    $0x10,%esp$/;"	l
 e2a	sh.asm	/^     e2a:	c3                   	ret    $/;"	l
 e2b	sh.asm	/^     e2b:	b8 0e 00 00 00       	mov    $0xe,%eax$/;"	l
 e2c	usertests.asm	/^     e2c:	85 c0                	test   %eax,%eax$/;"	l
 e2e	usertests.asm	/^     e2e:	75 e8                	jne    e18 <mem+0x38>$/;"	l
+e3	clear.asm	/^  e3:	89 c8                	mov    %ecx,%eax$/;"	l
 e3	echo.asm	/^  e3:	74 eb                	je     d0 <strcmp+0x20>$/;"	l
 e3	grep.asm	/^  e3:	57                   	push   %edi$/;"	l
 e3	ls.asm	/^  e3:	50                   	push   %eax$/;"	l
@@ -2071,25 +2126,21 @@ e30	sh.asm	/^     e30:	cd 40                	int    $0x40$/;"	l
 e30	usertests.asm	/^     e30:	85 f6                	test   %esi,%esi$/;"	l
 e32	sh.asm	/^     e32:	c3                   	ret    $/;"	l
 e32	usertests.asm	/^     e32:	74 18                	je     e4c <mem+0x6c>$/;"	l
-e33	sh.asm	/^     e33:	66 90                	xchg   %ax,%ax$/;"	l
+e33	sh.asm	/^     e33:	b8 16 00 00 00       	mov    $0x16,%eax$/;"	l
 e34	usertests.asm	/^     e34:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-e35	sh.asm	/^     e35:	66 90                	xchg   %ax,%ax$/;"	l
-e37	sh.asm	/^     e37:	66 90                	xchg   %ax,%ax$/;"	l
+e38	sh.asm	/^     e38:	cd 40                	int    $0x40$/;"	l
 e38	usertests.asm	/^     e38:	89 f0                	mov    %esi,%eax$/;"	l
-e39	sh.asm	/^     e39:	66 90                	xchg   %ax,%ax$/;"	l
+e3a	sh.asm	/^     e3a:	c3                   	ret    $/;"	l
 e3a	usertests.asm	/^     e3a:	83 ec 0c             	sub    $0xc,%esp$/;"	l
-e3b	sh.asm	/^     e3b:	66 90                	xchg   %ax,%ax$/;"	l
-e3d	sh.asm	/^     e3d:	66 90                	xchg   %ax,%ax$/;"	l
+e3b	sh.asm	/^     e3b:	b8 17 00 00 00       	mov    $0x17,%eax$/;"	l
 e3d	usertests.asm	/^     e3d:	8b 36                	mov    (%esi),%esi$/;"	l
-e3f	sh.asm	/^     e3f:	90                   	nop$/;"	l
 e3f	usertests.asm	/^     e3f:	50                   	push   %eax$/;"	l
 e4	cat.asm	/^  e4:	6a 01                	push   $0x1$/;"	l
 e4	getmaxpid_test.asm	/^  e4:	55                   	push   %ebp$/;"	l
 e4	getnumproc_test.asm	/^  e4:	55                   	push   %ebp$/;"	l
-e4	getprocinfo_test.asm	/^  e4:	55                   	push   %ebp$/;"	l
+e4	getprocinfo_test.asm	/^  e4:	83 c1 01             	add    $0x1,%ecx$/;"	l
 e4	grep.asm	/^  e4:	56                   	push   %esi$/;"	l
 e4	hello_test.asm	/^  e4:	55                   	push   %ebp$/;"	l
-e4	helloname_test.asm	/^  e4:	55                   	push   %ebp$/;"	l
 e4	kill.asm	/^  e4:	5b                   	pop    %ebx$/;"	l
 e4	ln.asm	/^  e4:	55                   	push   %ebp$/;"	l
 e4	ls.asm	/^  e4:	e8 17 03 00 00       	call   400 <memset>$/;"	l
@@ -2098,28 +2149,24 @@ e4	seqinc_prio.asm	/^  e4:	55                   	push   %ebp$/;"	l
 e4	sh.asm	/^      e4:	e8 d2 0c 00 00       	call   dbb <close>$/;"	l
 e4	usertests.asm	/^      e4:	e8 b7 1c 00 00       	call   1da0 <subdir>$/;"	l
 e4	wc.asm	/^  e4:	7e 62                	jle    148 <wc+0xa8>$/;"	l
-e40	sh.asm	/^     e40:	55                   	push   %ebp$/;"	l
-e40	usertests.asm	/^     e40:	e8 6b 2e 00 00       	call   3cb0 <free>$/;"	l
-e41	sh.asm	/^     e41:	89 e5                	mov    %esp,%ebp$/;"	l
-e43	sh.asm	/^     e43:	57                   	push   %edi$/;"	l
-e44	sh.asm	/^     e44:	56                   	push   %esi$/;"	l
-e45	sh.asm	/^     e45:	53                   	push   %ebx$/;"	l
+e40	sh.asm	/^     e40:	cd 40                	int    $0x40$/;"	l
+e40	usertests.asm	/^     e40:	e8 8b 2e 00 00       	call   3cd0 <free>$/;"	l
+e42	sh.asm	/^     e42:	c3                   	ret    $/;"	l
+e43	sh.asm	/^     e43:	b8 18 00 00 00       	mov    $0x18,%eax$/;"	l
 e45	usertests.asm	/^     e45:	83 c4 10             	add    $0x10,%esp$/;"	l
-e46	sh.asm	/^     e46:	83 ec 3c             	sub    $0x3c,%esp$/;"	l
+e48	sh.asm	/^     e48:	cd 40                	int    $0x40$/;"	l
 e48	usertests.asm	/^     e48:	85 f6                	test   %esi,%esi$/;"	l
-e49	sh.asm	/^     e49:	89 4d c4             	mov    %ecx,-0x3c(%ebp)$/;"	l
+e4a	sh.asm	/^     e4a:	c3                   	ret    $/;"	l
 e4a	usertests.asm	/^     e4a:	75 ec                	jne    e38 <mem+0x58>$/;"	l
-e4c	sh.asm	/^     e4c:	89 d1                	mov    %edx,%ecx$/;"	l
+e4b	sh.asm	/^     e4b:	b8 1a 00 00 00       	mov    $0x1a,%eax$/;"	l
 e4c	usertests.asm	/^     e4c:	83 ec 0c             	sub    $0xc,%esp$/;"	l
-e4e	sh.asm	/^     e4e:	89 45 b8             	mov    %eax,-0x48(%ebp)$/;"	l
 e4f	usertests.asm	/^     e4f:	68 00 50 00 00       	push   $0x5000$/;"	l
+e5	clear.asm	/^  e5:	c3                   	ret    $/;"	l
 e5	echo.asm	/^  e5:	29 d8                	sub    %ebx,%eax$/;"	l
 e5	getmaxpid_test.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
 e5	getnumproc_test.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
-e5	getprocinfo_test.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
 e5	grep.asm	/^  e5:	e8 36 00 00 00       	call   120 <matchhere>$/;"	l
 e5	hello_test.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
-e5	helloname_test.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
 e5	init.asm	/^  e5:	83 c4 10             	add    $0x10,%esp$/;"	l
 e5	kill.asm	/^  e5:	5d                   	pop    %ebp$/;"	l
 e5	ln.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
@@ -2128,67 +2175,76 @@ e5	rm.asm	/^  e5:	29 d8                	sub    %ebx,%eax$/;"	l
 e5	seqdec_prio.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
 e5	seqinc_prio.asm	/^  e5:	89 e5                	mov    %esp,%ebp$/;"	l
 e5	zombie.asm	/^  e5:	c3                   	ret    $/;"	l
-e51	sh.asm	/^     e51:	85 d2                	test   %edx,%edx$/;"	l
-e53	sh.asm	/^     e53:	0f 89 7f 00 00 00    	jns    ed8 <printint+0x98>$/;"	l
-e54	usertests.asm	/^     e54:	e8 e7 2e 00 00       	call   3d40 <malloc>$/;"	l
-e59	sh.asm	/^     e59:	f6 45 08 01          	testb  $0x1,0x8(%ebp)$/;"	l
+e50	sh.asm	/^     e50:	cd 40                	int    $0x40$/;"	l
+e52	sh.asm	/^     e52:	c3                   	ret    $/;"	l
+e53	sh.asm	/^     e53:	b8 1b 00 00 00       	mov    $0x1b,%eax$/;"	l
+e54	usertests.asm	/^     e54:	e8 07 2f 00 00       	call   3d60 <malloc>$/;"	l
+e58	sh.asm	/^     e58:	cd 40                	int    $0x40$/;"	l
 e59	usertests.asm	/^     e59:	83 c4 10             	add    $0x10,%esp$/;"	l
+e5a	sh.asm	/^     e5a:	c3                   	ret    $/;"	l
+e5b	sh.asm	/^     e5b:	66 90                	xchg   %ax,%ax$/;"	l
 e5c	usertests.asm	/^     e5c:	85 c0                	test   %eax,%eax$/;"	l
-e5d	sh.asm	/^     e5d:	74 79                	je     ed8 <printint+0x98>$/;"	l
+e5d	sh.asm	/^     e5d:	66 90                	xchg   %ax,%ax$/;"	l
 e5e	usertests.asm	/^     e5e:	74 20                	je     e80 <mem+0xa0>$/;"	l
-e5f	sh.asm	/^     e5f:	c7 45 bc 01 00 00 00 	movl   $0x1,-0x44(%ebp)$/;"	l
-e6	cat.asm	/^  e6:	e8 e5 03 00 00       	call   4d0 <printf>$/;"	l
+e5f	sh.asm	/^     e5f:	90                   	nop$/;"	l
+e6	cat.asm	/^  e6:	e8 05 04 00 00       	call   4f0 <printf>$/;"	l
+e6	clear.asm	/^  e6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 e6	kill.asm	/^  e6:	c3                   	ret    $/;"	l
 e6	stressfs.asm	/^  e6:	8d 85 de fd ff ff    	lea    -0x222(%ebp),%eax$/;"	l
 e6	wc.asm	/^  e6:	31 ff                	xor    %edi,%edi$/;"	l
 e6	zombie.asm	/^  e6:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+e60	sh.asm	/^     e60:	55                   	push   %ebp$/;"	l
 e60	usertests.asm	/^     e60:	83 ec 0c             	sub    $0xc,%esp$/;"	l
+e61	sh.asm	/^     e61:	89 e5                	mov    %esp,%ebp$/;"	l
+e63	sh.asm	/^     e63:	57                   	push   %edi$/;"	l
 e63	usertests.asm	/^     e63:	50                   	push   %eax$/;"	l
-e64	usertests.asm	/^     e64:	e8 47 2e 00 00       	call   3cb0 <free>$/;"	l
-e66	sh.asm	/^     e66:	f7 d9                	neg    %ecx$/;"	l
-e68	sh.asm	/^     e68:	31 db                	xor    %ebx,%ebx$/;"	l
+e64	sh.asm	/^     e64:	56                   	push   %esi$/;"	l
+e64	usertests.asm	/^     e64:	e8 67 2e 00 00       	call   3cd0 <free>$/;"	l
+e65	sh.asm	/^     e65:	53                   	push   %ebx$/;"	l
+e66	sh.asm	/^     e66:	83 ec 3c             	sub    $0x3c,%esp$/;"	l
+e69	sh.asm	/^     e69:	89 4d c4             	mov    %ecx,-0x3c(%ebp)$/;"	l
 e69	usertests.asm	/^     e69:	58                   	pop    %eax$/;"	l
-e6a	sh.asm	/^     e6a:	8d 75 d7             	lea    -0x29(%ebp),%esi$/;"	l
 e6a	usertests.asm	/^     e6a:	5a                   	pop    %edx$/;"	l
-e6b	usertests.asm	/^     e6b:	68 6c 42 00 00       	push   $0x426c$/;"	l
-e6d	sh.asm	/^     e6d:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
+e6b	usertests.asm	/^     e6b:	68 8c 42 00 00       	push   $0x428c$/;"	l
+e6c	sh.asm	/^     e6c:	89 d1                	mov    %edx,%ecx$/;"	l
+e6e	sh.asm	/^     e6e:	89 45 b8             	mov    %eax,-0x48(%ebp)$/;"	l
 e7	echo.asm	/^  e7:	5b                   	pop    %ebx$/;"	l
 e7	forktest.asm	/^  e7:	e8 e4 00 00 00       	call   1d0 <strlen>$/;"	l
 e7	getmaxpid_test.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
-e7	getnumproc_test.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
-e7	getprocinfo_test.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
-e7	hello_test.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
-e7	helloname_test.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
+e7	getnumproc_test.asm	/^  e7:	57                   	push   %edi$/;"	l
+e7	getprocinfo_test.asm	/^  e7:	83 c2 01             	add    $0x1,%edx$/;"	l
+e7	hello_test.asm	/^  e7:	57                   	push   %edi$/;"	l
 e7	kill.asm	/^  e7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 e7	ln.asm	/^  e7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
 e7	mkdir.asm	/^  e7:	5b                   	pop    %ebx$/;"	l
 e7	rm.asm	/^  e7:	5b                   	pop    %ebx$/;"	l
 e7	seqdec_prio.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
 e7	seqinc_prio.asm	/^  e7:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
-e70	sh.asm	/^     e70:	89 c8                	mov    %ecx,%eax$/;"	l
 e70	usertests.asm	/^     e70:	6a 01                	push   $0x1$/;"	l
-e72	sh.asm	/^     e72:	31 d2                	xor    %edx,%edx$/;"	l
-e72	usertests.asm	/^     e72:	e8 69 2c 00 00       	call   3ae0 <printf>$/;"	l
-e74	sh.asm	/^     e74:	89 cf                	mov    %ecx,%edi$/;"	l
-e76	sh.asm	/^     e76:	f7 75 c4             	divl   -0x3c(%ebp)$/;"	l
+e71	sh.asm	/^     e71:	85 d2                	test   %edx,%edx$/;"	l
+e72	usertests.asm	/^     e72:	e8 89 2c 00 00       	call   3b00 <printf>$/;"	l
+e73	sh.asm	/^     e73:	0f 89 7f 00 00 00    	jns    ef8 <printint+0x98>$/;"	l
 e77	usertests.asm	/^     e77:	e8 07 2b 00 00       	call   3983 <exit>$/;"	l
-e79	sh.asm	/^     e79:	0f b6 92 48 13 00 00 	movzbl 0x1348(%edx),%edx$/;"	l
+e79	sh.asm	/^     e79:	f6 45 08 01          	testb  $0x1,0x8(%ebp)$/;"	l
 e7c	usertests.asm	/^     e7c:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+e7d	sh.asm	/^     e7d:	74 79                	je     ef8 <printint+0x98>$/;"	l
+e7f	sh.asm	/^     e7f:	c7 45 bc 01 00 00 00 	movl   $0x1,-0x44(%ebp)$/;"	l
 e8	echo.asm	/^  e8:	5d                   	pop    %ebp$/;"	l
+e8	getnumproc_test.asm	/^  e8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+e8	hello_test.asm	/^  e8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+e8	helloname_test.asm	/^  e8:	83 c0 01             	add    $0x1,%eax$/;"	l
 e8	init.asm	/^  e8:	e9 40 ff ff ff       	jmp    2d <main+0x2d>$/;"	l
 e8	mkdir.asm	/^  e8:	5d                   	pop    %ebp$/;"	l
 e8	rm.asm	/^  e8:	5d                   	pop    %ebp$/;"	l
 e8	wc.asm	/^  e8:	eb 14                	jmp    fe <wc+0x5e>$/;"	l
-e80	sh.asm	/^     e80:	89 45 c0             	mov    %eax,-0x40(%ebp)$/;"	l
 e80	usertests.asm	/^     e80:	83 ec 08             	sub    $0x8,%esp$/;"	l
-e83	sh.asm	/^     e83:	89 d8                	mov    %ebx,%eax$/;"	l
-e83	usertests.asm	/^     e83:	68 52 42 00 00       	push   $0x4252$/;"	l
-e85	sh.asm	/^     e85:	8d 5b 01             	lea    0x1(%ebx),%ebx$/;"	l
-e88	sh.asm	/^     e88:	8b 4d c0             	mov    -0x40(%ebp),%ecx$/;"	l
+e83	usertests.asm	/^     e83:	68 72 42 00 00       	push   $0x4272$/;"	l
+e86	sh.asm	/^     e86:	f7 d9                	neg    %ecx$/;"	l
+e88	sh.asm	/^     e88:	31 db                	xor    %ebx,%ebx$/;"	l
 e88	usertests.asm	/^     e88:	6a 01                	push   $0x1$/;"	l
-e8a	usertests.asm	/^     e8a:	e8 51 2c 00 00       	call   3ae0 <printf>$/;"	l
-e8b	sh.asm	/^     e8b:	88 14 1e             	mov    %dl,(%esi,%ebx,1)$/;"	l
-e8e	sh.asm	/^     e8e:	39 7d c4             	cmp    %edi,-0x3c(%ebp)$/;"	l
+e8a	sh.asm	/^     e8a:	8d 75 d7             	lea    -0x29(%ebp),%esi$/;"	l
+e8a	usertests.asm	/^     e8a:	e8 71 2c 00 00       	call   3b00 <printf>$/;"	l
+e8d	sh.asm	/^     e8d:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
 e8f	usertests.asm	/^     e8f:	89 1c 24             	mov    %ebx,(%esp)$/;"	l
 e9	echo.asm	/^  e9:	c3                   	ret    $/;"	l
 e9	ls.asm	/^  e9:	83 c4 10             	add    $0x10,%esp$/;"	l
@@ -2196,59 +2252,58 @@ e9	mkdir.asm	/^  e9:	c3                   	ret    $/;"	l
 e9	rm.asm	/^  e9:	c3                   	ret    $/;"	l
 e9	sh.asm	/^      e9:	83 c4 10             	add    $0x10,%esp$/;"	l
 e9	usertests.asm	/^      e9:	e8 42 15 00 00       	call   1630 <linktest>$/;"	l
-e91	sh.asm	/^     e91:	76 dd                	jbe    e70 <printint+0x30>$/;"	l
+e90	sh.asm	/^     e90:	89 c8                	mov    %ecx,%eax$/;"	l
+e92	sh.asm	/^     e92:	31 d2                	xor    %edx,%edx$/;"	l
 e92	usertests.asm	/^     e92:	e8 1c 2b 00 00       	call   39b3 <kill>$/;"	l
-e93	sh.asm	/^     e93:	8b 4d bc             	mov    -0x44(%ebp),%ecx$/;"	l
-e96	sh.asm	/^     e96:	85 c9                	test   %ecx,%ecx$/;"	l
+e94	sh.asm	/^     e94:	89 cf                	mov    %ecx,%edi$/;"	l
+e96	sh.asm	/^     e96:	f7 75 c4             	divl   -0x3c(%ebp)$/;"	l
 e97	usertests.asm	/^     e97:	e8 e7 2a 00 00       	call   3983 <exit>$/;"	l
-e98	sh.asm	/^     e98:	74 0c                	je     ea6 <printint+0x66>$/;"	l
-e9a	sh.asm	/^     e9a:	c6 44 1d d8 2d       	movb   $0x2d,-0x28(%ebp,%ebx,1)$/;"	l
+e99	sh.asm	/^     e99:	0f b6 92 68 13 00 00 	movzbl 0x1368(%edx),%edx$/;"	l
 e9c	usertests.asm	/^     e9c:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-e9f	sh.asm	/^     e9f:	89 d8                	mov    %ebx,%eax$/;"	l
 ea	echo.asm	/^  ea:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ea	getmaxpid_test.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
-ea	getnumproc_test.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
-ea	getprocinfo_test.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
+ea	getprocinfo_test.asm	/^  ea:	0f b6 1a             	movzbl (%edx),%ebx$/;"	l
 ea	grep.asm	/^  ea:	83 c4 10             	add    $0x10,%esp$/;"	l
-ea	hello_test.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
-ea	helloname_test.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
 ea	ln.asm	/^  ea:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
 ea	mkdir.asm	/^  ea:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ea	rm.asm	/^  ea:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
 ea	seqdec_prio.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
 ea	seqinc_prio.asm	/^  ea:	0f b6 4d 0c          	movzbl 0xc(%ebp),%ecx$/;"	l
 ea	wc.asm	/^  ea:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+ea0	sh.asm	/^     ea0:	89 45 c0             	mov    %eax,-0x40(%ebp)$/;"	l
 ea0	usertests.asm	/^     ea0:	8d 65 f8             	lea    -0x8(%ebp),%esp$/;"	l
-ea1	sh.asm	/^     ea1:	ba 2d 00 00 00       	mov    $0x2d,%edx$/;"	l
+ea3	sh.asm	/^     ea3:	89 d8                	mov    %ebx,%eax$/;"	l
 ea3	usertests.asm	/^     ea3:	5b                   	pop    %ebx$/;"	l
 ea4	usertests.asm	/^     ea4:	5e                   	pop    %esi$/;"	l
+ea5	sh.asm	/^     ea5:	8d 5b 01             	lea    0x1(%ebx),%ebx$/;"	l
 ea5	usertests.asm	/^     ea5:	5d                   	pop    %ebp$/;"	l
-ea6	sh.asm	/^     ea6:	8b 7d b8             	mov    -0x48(%ebp),%edi$/;"	l
 ea6	usertests.asm	/^     ea6:	e9 e0 2a 00 00       	jmp    398b <wait>$/;"	l
-ea9	sh.asm	/^     ea9:	8d 5c 05 d7          	lea    -0x29(%ebp,%eax,1),%ebx$/;"	l
+ea8	sh.asm	/^     ea8:	8b 4d c0             	mov    -0x40(%ebp),%ecx$/;"	l
+eab	sh.asm	/^     eab:	88 14 1e             	mov    %dl,(%esi,%ebx,1)$/;"	l
 eab	usertests.asm	/^     eab:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-ead	sh.asm	/^     ead:	eb 07                	jmp    eb6 <printint+0x76>$/;"	l
-eaf	sh.asm	/^     eaf:	90                   	nop$/;"	l
+eae	sh.asm	/^     eae:	39 7d c4             	cmp    %edi,-0x3c(%ebp)$/;"	l
 eaf	usertests.asm	/^     eaf:	90                   	nop$/;"	l
 eargv	sh.c	/^  char *eargv[MAXARGS];$/;"	m	struct:execcmd	typeref:typename:char * []	file:
 eax	mmu.h	/^  uint eax;          \/\/ More saved state (registers)$/;"	m	struct:taskstate	typeref:typename:uint
 eax	x86.h	/^  uint eax;$/;"	m	struct:trapframe	typeref:typename:uint
 eb	cat.asm	/^  eb:	e8 83 02 00 00       	call   373 <exit>$/;"	l
-eb0	sh.asm	/^     eb0:	0f b6 13             	movzbl (%ebx),%edx$/;"	l
+eb	getnumproc_test.asm	/^  eb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
+eb	hello_test.asm	/^  eb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
+eb	helloname_test.asm	/^  eb:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)$/;"	l
 eb0	usertests.asm	/^     eb0:	f3 0f 1e fb          	endbr32 $/;"	l
-eb3	sh.asm	/^     eb3:	83 eb 01             	sub    $0x1,%ebx$/;"	l
+eb1	sh.asm	/^     eb1:	76 dd                	jbe    e90 <printint+0x30>$/;"	l
+eb3	sh.asm	/^     eb3:	8b 4d bc             	mov    -0x44(%ebp),%ecx$/;"	l
 eb4	usertests.asm	/^     eb4:	55                   	push   %ebp$/;"	l
 eb5	usertests.asm	/^     eb5:	89 e5                	mov    %esp,%ebp$/;"	l
-eb6	sh.asm	/^     eb6:	83 ec 04             	sub    $0x4,%esp$/;"	l
+eb6	sh.asm	/^     eb6:	85 c9                	test   %ecx,%ecx$/;"	l
 eb7	usertests.asm	/^     eb7:	57                   	push   %edi$/;"	l
+eb8	sh.asm	/^     eb8:	74 0c                	je     ec6 <printint+0x66>$/;"	l
 eb8	usertests.asm	/^     eb8:	56                   	push   %esi$/;"	l
-eb9	sh.asm	/^     eb9:	88 55 d7             	mov    %dl,-0x29(%ebp)$/;"	l
 eb9	usertests.asm	/^     eb9:	53                   	push   %ebx$/;"	l
+eba	sh.asm	/^     eba:	c6 44 1d d8 2d       	movb   $0x2d,-0x28(%ebp,%ebx,1)$/;"	l
 eba	usertests.asm	/^     eba:	83 ec 34             	sub    $0x34,%esp$/;"	l
-ebc	sh.asm	/^     ebc:	6a 01                	push   $0x1$/;"	l
-ebd	usertests.asm	/^     ebd:	68 74 42 00 00       	push   $0x4274$/;"	l
-ebe	sh.asm	/^     ebe:	56                   	push   %esi$/;"	l
-ebf	sh.asm	/^     ebf:	57                   	push   %edi$/;"	l
+ebd	usertests.asm	/^     ebd:	68 94 42 00 00       	push   $0x4294$/;"	l
+ebf	sh.asm	/^     ebf:	89 d8                	mov    %ebx,%eax$/;"	l
 ebp	kernel.asm	/^    ebp = (uint*)ebp[0]; \/\/ saved %ebp$/;"	d
 ebp	kernel.asm	/^  ebp = (uint*)v - 2;$/;"	d
 ebp	mmu.h	/^  uint *ebp;$/;"	m	struct:taskstate	typeref:typename:uint *
@@ -2261,76 +2316,79 @@ ec	forktest.asm	/^  ec:	83 c4 0c             	add    $0xc,%esp$/;"	l
 ec	ls.asm	/^  ec:	8d 65 f8             	lea    -0x8(%ebp),%esp$/;"	l
 ec	sh.asm	/^      ec:	eb 85                	jmp    73 <main+0x73>$/;"	l
 ec	stressfs.asm	/^  ec:	59                   	pop    %ecx$/;"	l
-ec0	sh.asm	/^     ec0:	e8 ee fe ff ff       	call   db3 <write>$/;"	l
+ec1	sh.asm	/^     ec1:	ba 2d 00 00 00       	mov    $0x2d,%edx$/;"	l
 ec2	usertests.asm	/^     ec2:	6a 01                	push   $0x1$/;"	l
-ec4	usertests.asm	/^     ec4:	e8 17 2c 00 00       	call   3ae0 <printf>$/;"	l
-ec5	sh.asm	/^     ec5:	83 c4 10             	add    $0x10,%esp$/;"	l
-ec8	sh.asm	/^     ec8:	39 de                	cmp    %ebx,%esi$/;"	l
-ec9	usertests.asm	/^     ec9:	c7 04 24 83 42 00 00 	movl   $0x4283,(%esp)$/;"	l
-eca	sh.asm	/^     eca:	75 e4                	jne    eb0 <printint+0x70>$/;"	l
-ecc	sh.asm	/^     ecc:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
-ecf	sh.asm	/^     ecf:	5b                   	pop    %ebx$/;"	l
+ec4	usertests.asm	/^     ec4:	e8 37 2c 00 00       	call   3b00 <printf>$/;"	l
+ec6	sh.asm	/^     ec6:	8b 7d b8             	mov    -0x48(%ebp),%edi$/;"	l
+ec9	sh.asm	/^     ec9:	8d 5c 05 d7          	lea    -0x29(%ebp,%eax,1),%ebx$/;"	l
+ec9	usertests.asm	/^     ec9:	c7 04 24 a3 42 00 00 	movl   $0x42a3,(%esp)$/;"	l
+ecd	sh.asm	/^     ecd:	eb 07                	jmp    ed6 <printint+0x76>$/;"	l
+ecf	sh.asm	/^     ecf:	90                   	nop$/;"	l
 echoargv	usertests.c	/^char *echoargv[] = { "echo", "ALL", "TESTS", "PASSED", 0 };$/;"	v	typeref:typename:char * []
 ecx	mmu.h	/^  uint ecx;$/;"	m	struct:taskstate	typeref:typename:uint
 ecx	x86.h	/^  uint ecx;$/;"	m	struct:trapframe	typeref:typename:uint
+ed	clear.asm	/^  ed:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
+ed	getprocinfo_test.asm	/^  ed:	84 c0                	test   %al,%al$/;"	l
 ed	grep.asm	/^  ed:	85 c0                	test   %eax,%eax$/;"	l
 ed	init.asm	/^  ed:	66 90                	xchg   %ax,%ax$/;"	l
 ed	ln.asm	/^  ed:	74 21                	je     110 <strlen+0x30>$/;"	l
 ed	stressfs.asm	/^  ed:	5b                   	pop    %ebx$/;"	l
 ed	zombie.asm	/^  ed:	8d 76 00             	lea    0x0(%esi),%esi$/;"	l
-ed0	sh.asm	/^     ed0:	5e                   	pop    %esi$/;"	l
+ed0	sh.asm	/^     ed0:	0f b6 13             	movzbl (%ebx),%edx$/;"	l
 ed0	usertests.asm	/^     ed0:	e8 fe 2a 00 00       	call   39d3 <unlink>$/;"	l
-ed1	sh.asm	/^     ed1:	5f                   	pop    %edi$/;"	l
-ed2	sh.asm	/^     ed2:	5d                   	pop    %ebp$/;"	l
-ed3	sh.asm	/^     ed3:	c3                   	ret    $/;"	l
-ed4	sh.asm	/^     ed4:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+ed3	sh.asm	/^     ed3:	83 eb 01             	sub    $0x1,%ebx$/;"	l
 ed5	usertests.asm	/^     ed5:	5b                   	pop    %ebx$/;"	l
+ed6	sh.asm	/^     ed6:	83 ec 04             	sub    $0x4,%esp$/;"	l
 ed6	usertests.asm	/^     ed6:	5e                   	pop    %esi$/;"	l
 ed7	usertests.asm	/^     ed7:	68 02 02 00 00       	push   $0x202$/;"	l
-ed8	sh.asm	/^     ed8:	c7 45 bc 00 00 00 00 	movl   $0x0,-0x44(%ebp)$/;"	l
+ed9	sh.asm	/^     ed9:	88 55 d7             	mov    %dl,-0x29(%ebp)$/;"	l
 edata	kernel.ld	/^	PROVIDE(edata = .);$/;"	s	assignment:provide
-edc	usertests.asm	/^     edc:	68 83 42 00 00       	push   $0x4283$/;"	l
-edf	sh.asm	/^     edf:	eb 87                	jmp    e68 <printint+0x28>$/;"	l
+edc	sh.asm	/^     edc:	6a 01                	push   $0x1$/;"	l
+edc	usertests.asm	/^     edc:	68 a3 42 00 00       	push   $0x42a3$/;"	l
+ede	sh.asm	/^     ede:	56                   	push   %esi$/;"	l
+edf	sh.asm	/^     edf:	57                   	push   %edi$/;"	l
 edi	mmu.h	/^  uint edi;$/;"	m	struct:taskstate	typeref:typename:uint
 edi	proc.h	/^  uint edi;$/;"	m	struct:context	typeref:typename:uint
 edi	x86.h	/^  uint edi;$/;"	m	struct:trapframe	typeref:typename:uint
 edx	mmu.h	/^  uint edx;$/;"	m	struct:taskstate	typeref:typename:uint
 edx	x86.h	/^  uint edx;$/;"	m	struct:trapframe	typeref:typename:uint
 ee	getmaxpid_test.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
-ee	getnumproc_test.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
-ee	getprocinfo_test.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
-ee	hello_test.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
-ee	helloname_test.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
+ee	getnumproc_test.asm	/^  ee:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
+ee	hello_test.asm	/^  ee:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
 ee	kill.asm	/^  ee:	66 90                	xchg   %ax,%ax$/;"	l
 ee	seqdec_prio.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
 ee	seqinc_prio.asm	/^  ee:	0f b6 10             	movzbl (%eax),%edx$/;"	l
 ee	sh.asm	/^      ee:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 ee	stressfs.asm	/^  ee:	6a 00                	push   $0x0$/;"	l
 ee	usertests.asm	/^      ee:	e8 ad 13 00 00       	call   14a0 <unlinkread>$/;"	l
-ee1	sh.asm	/^     ee1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+ee0	sh.asm	/^     ee0:	e8 ce fe ff ff       	call   db3 <write>$/;"	l
 ee1	usertests.asm	/^     ee1:	e8 dd 2a 00 00       	call   39c3 <open>$/;"	l
+ee5	sh.asm	/^     ee5:	83 c4 10             	add    $0x10,%esp$/;"	l
 ee6	usertests.asm	/^     ee6:	83 c4 10             	add    $0x10,%esp$/;"	l
-ee8	sh.asm	/^     ee8:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+ee8	sh.asm	/^     ee8:	39 de                	cmp    %ebx,%esi$/;"	l
 ee9	usertests.asm	/^     ee9:	85 c0                	test   %eax,%eax$/;"	l
+eea	sh.asm	/^     eea:	75 e4                	jne    ed0 <printint+0x70>$/;"	l
 eeb	usertests.asm	/^     eeb:	0f 88 26 01 00 00    	js     1017 <sharedfd+0x167>$/;"	l
-eef	sh.asm	/^     eef:	90                   	nop$/;"	l
+eec	sh.asm	/^     eec:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
+eef	sh.asm	/^     eef:	5b                   	pop    %ebx$/;"	l
 ef	forktest.asm	/^  ef:	50                   	push   %eax$/;"	l
+ef	getprocinfo_test.asm	/^  ef:	74 0f                	je     100 <strcmp+0x40>$/;"	l
 ef	grep.asm	/^  ef:	75 1f                	jne    110 <matchstar+0x50>$/;"	l
+ef	helloname_test.asm	/^  ef:	89 c1                	mov    %eax,%ecx$/;"	l
 ef	init.asm	/^  ef:	90                   	nop$/;"	l
 ef	ln.asm	/^  ef:	31 c0                	xor    %eax,%eax$/;"	l
 ef	ls.asm	/^  ef:	89 d8                	mov    %ebx,%eax$/;"	l
-ef0	sh.asm	/^     ef0:	f3 0f 1e fb          	endbr32 $/;"	l
+ef0	sh.asm	/^     ef0:	5e                   	pop    %esi$/;"	l
+ef1	sh.asm	/^     ef1:	5f                   	pop    %edi$/;"	l
 ef1	usertests.asm	/^     ef1:	89 c7                	mov    %eax,%edi$/;"	l
+ef2	sh.asm	/^     ef2:	5d                   	pop    %ebp$/;"	l
+ef3	sh.asm	/^     ef3:	c3                   	ret    $/;"	l
 ef3	usertests.asm	/^     ef3:	8d 75 de             	lea    -0x22(%ebp),%esi$/;"	l
-ef4	sh.asm	/^     ef4:	55                   	push   %ebp$/;"	l
-ef5	sh.asm	/^     ef5:	89 e5                	mov    %esp,%ebp$/;"	l
+ef4	sh.asm	/^     ef4:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 ef6	usertests.asm	/^     ef6:	bb e8 03 00 00       	mov    $0x3e8,%ebx$/;"	l
-ef7	sh.asm	/^     ef7:	57                   	push   %edi$/;"	l
-ef8	sh.asm	/^     ef8:	56                   	push   %esi$/;"	l
-ef9	sh.asm	/^     ef9:	53                   	push   %ebx$/;"	l
-efa	sh.asm	/^     efa:	83 ec 2c             	sub    $0x2c,%esp$/;"	l
+ef8	sh.asm	/^     ef8:	c7 45 bc 00 00 00 00 	movl   $0x0,-0x44(%ebp)$/;"	l
 efb	usertests.asm	/^     efb:	e8 7b 2a 00 00       	call   397b <fork>$/;"	l
-efd	sh.asm	/^     efd:	8b 75 0c             	mov    0xc(%ebp),%esi$/;"	l
+eff	sh.asm	/^     eff:	eb 87                	jmp    e88 <printint+0x28>$/;"	l
 efile	sh.c	/^  char *efile;$/;"	m	struct:redircmd	typeref:typename:char *	file:
 eflags	kernel.asm	/^  eflags = readeflags();$/;"	d
 eflags	mmu.h	/^  uint eflags;$/;"	m	struct:taskstate	typeref:typename:uint
@@ -2392,9 +2450,14 @@ exit	proc.c	/^exit(void)$/;"	f	typeref:typename:void
 exitiputtest	usertests.c	/^exitiputtest(void)$/;"	f	typeref:typename:void
 exitwait	usertests.c	/^exitwait(void)$/;"	f	typeref:typename:void
 f	cat.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
+f	clear.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	echo.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	forktest.asm	/^   f:	e8 9f 03 00 00       	call   3b3 <exit>$/;"	l
+f	getnumproc_test.asm	/^   f:	e8 6f 02 00 00       	call   283 <exit>$/;"	l
+f	getprocinfo_test.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	grep.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
+f	hello_test.asm	/^   f:	e8 6f 02 00 00       	call   283 <exit>$/;"	l
+f	helloname_test.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	init.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	kill.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	ls.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
@@ -2405,8 +2468,9 @@ f	usertests.asm	/^       f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	wc.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f	zombie.asm	/^   f:	89 e5                	mov    %esp,%ebp$/;"	l
 f0	cat.asm	/^  f0:	50                   	push   %eax$/;"	l
+f0	clear.asm	/^  f0:	f3 0f 1e fb          	endbr32 $/;"	l
 f0	echo.asm	/^  f0:	31 c0                	xor    %eax,%eax$/;"	l
-f0	forktest.asm	/^  f0:	68 5f 04 00 00       	push   $0x45f$/;"	l
+f0	forktest.asm	/^  f0:	68 87 04 00 00       	push   $0x487$/;"	l
 f0	init.asm	/^  f0:	f3 0f 1e fb          	endbr32 $/;"	l
 f0	kill.asm	/^  f0:	f3 0f 1e fb          	endbr32 $/;"	l
 f0	mkdir.asm	/^  f0:	31 c0                	xor    %eax,%eax$/;"	l
@@ -2414,105 +2478,106 @@ f0	rm.asm	/^  f0:	31 c0                	xor    %eax,%eax$/;"	l
 f0	stressfs.asm	/^  f0:	bb 14 00 00 00       	mov    $0x14,%ebx$/;"	l
 f0	wc.asm	/^  f0:	c7 45 e4 00 00 00 00 	movl   $0x0,-0x1c(%ebp)$/;"	l
 f0	zombie.asm	/^  f0:	f3 0f 1e fb          	endbr32 $/;"	l
-f00	sh.asm	/^     f00:	0f b6 1e             	movzbl (%esi),%ebx$/;"	l
 f00	usertests.asm	/^     f00:	83 f8 01             	cmp    $0x1,%eax$/;"	l
-f03	sh.asm	/^     f03:	84 db                	test   %bl,%bl$/;"	l
+f01	sh.asm	/^     f01:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 f03	usertests.asm	/^     f03:	89 45 d4             	mov    %eax,-0x2c(%ebp)$/;"	l
-f05	sh.asm	/^     f05:	0f 84 b4 00 00 00    	je     fbf <printf+0xcf>$/;"	l
 f06	usertests.asm	/^     f06:	19 c0                	sbb    %eax,%eax$/;"	l
+f08	sh.asm	/^     f08:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 f08	usertests.asm	/^     f08:	83 ec 04             	sub    $0x4,%esp$/;"	l
-f0b	sh.asm	/^     f0b:	8d 45 10             	lea    0x10(%ebp),%eax$/;"	l
 f0b	usertests.asm	/^     f0b:	83 e0 f3             	and    $0xfffffff3,%eax$/;"	l
-f0e	sh.asm	/^     f0e:	83 c6 01             	add    $0x1,%esi$/;"	l
 f0e	usertests.asm	/^     f0e:	6a 0a                	push   $0xa$/;"	l
+f0f	sh.asm	/^     f0f:	90                   	nop$/;"	l
 f1	cat.asm	/^  f1:	50                   	push   %eax$/;"	l
 f1	getmaxpid_test.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
-f1	getnumproc_test.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
-f1	getprocinfo_test.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
+f1	getnumproc_test.asm	/^  f1:	89 d7                	mov    %edx,%edi$/;"	l
+f1	getprocinfo_test.asm	/^  f1:	38 d8                	cmp    %bl,%al$/;"	l
 f1	grep.asm	/^  f1:	0f be 17             	movsbl (%edi),%edx$/;"	l
-f1	hello_test.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
-f1	helloname_test.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
+f1	hello_test.asm	/^  f1:	89 d7                	mov    %edx,%edi$/;"	l
+f1	helloname_test.asm	/^  f1:	75 f5                	jne    e8 <strlen+0x18>$/;"	l
 f1	ln.asm	/^  f1:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 f1	ls.asm	/^  f1:	5b                   	pop    %ebx$/;"	l
 f1	seqdec_prio.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
 f1	seqinc_prio.asm	/^  f1:	84 d2                	test   %dl,%dl$/;"	l
-f1	sh.asm	/^      f1:	68 40 19 00 00       	push   $0x1940$/;"	l
+f1	sh.asm	/^      f1:	68 60 19 00 00       	push   $0x1960$/;"	l
+f10	sh.asm	/^     f10:	f3 0f 1e fb          	endbr32 $/;"	l
 f10	usertests.asm	/^     f10:	83 c0 70             	add    $0x70,%eax$/;"	l
-f11	sh.asm	/^     f11:	8d 7d e7             	lea    -0x19(%ebp),%edi$/;"	l
 f13	usertests.asm	/^     f13:	50                   	push   %eax$/;"	l
-f14	sh.asm	/^     f14:	31 d2                	xor    %edx,%edx$/;"	l
+f14	sh.asm	/^     f14:	55                   	push   %ebp$/;"	l
 f14	usertests.asm	/^     f14:	56                   	push   %esi$/;"	l
+f15	sh.asm	/^     f15:	89 e5                	mov    %esp,%ebp$/;"	l
 f15	usertests.asm	/^     f15:	e8 c6 28 00 00       	call   37e0 <memset>$/;"	l
-f16	sh.asm	/^     f16:	89 45 d0             	mov    %eax,-0x30(%ebp)$/;"	l
-f19	sh.asm	/^     f19:	eb 33                	jmp    f4e <printf+0x5e>$/;"	l
+f17	sh.asm	/^     f17:	57                   	push   %edi$/;"	l
+f18	sh.asm	/^     f18:	56                   	push   %esi$/;"	l
+f19	sh.asm	/^     f19:	53                   	push   %ebx$/;"	l
+f1a	sh.asm	/^     f1a:	83 ec 2c             	sub    $0x2c,%esp$/;"	l
 f1a	usertests.asm	/^     f1a:	83 c4 10             	add    $0x10,%esp$/;"	l
-f1b	sh.asm	/^     f1b:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+f1d	sh.asm	/^     f1d:	8b 75 0c             	mov    0xc(%ebp),%esi$/;"	l
 f1d	usertests.asm	/^     f1d:	eb 06                	jmp    f25 <sharedfd+0x75>$/;"	l
-f1f	sh.asm	/^     f1f:	90                   	nop$/;"	l
 f1f	usertests.asm	/^     f1f:	90                   	nop$/;"	l
-f2	cat.asm	/^  f2:	68 4a 08 00 00       	push   $0x84a$/;"	l
+f2	cat.asm	/^  f2:	68 6a 08 00 00       	push   $0x86a$/;"	l
 f2	echo.asm	/^  f2:	29 d8                	sub    %ebx,%eax$/;"	l
 f2	ls.asm	/^  f2:	5e                   	pop    %esi$/;"	l
 f2	mkdir.asm	/^  f2:	29 d8                	sub    %ebx,%eax$/;"	l
 f2	rm.asm	/^  f2:	29 d8                	sub    %ebx,%eax$/;"	l
-f20	sh.asm	/^     f20:	89 55 d4             	mov    %edx,-0x2c(%ebp)$/;"	l
+f20	sh.asm	/^     f20:	0f b6 1e             	movzbl (%esi),%ebx$/;"	l
 f20	usertests.asm	/^     f20:	83 eb 01             	sub    $0x1,%ebx$/;"	l
-f23	sh.asm	/^     f23:	ba 25 00 00 00       	mov    $0x25,%edx$/;"	l
+f23	sh.asm	/^     f23:	84 db                	test   %bl,%bl$/;"	l
 f23	usertests.asm	/^     f23:	74 26                	je     f4b <sharedfd+0x9b>$/;"	l
+f25	sh.asm	/^     f25:	0f 84 b4 00 00 00    	je     fdf <printf+0xcf>$/;"	l
 f25	usertests.asm	/^     f25:	83 ec 04             	sub    $0x4,%esp$/;"	l
-f28	sh.asm	/^     f28:	83 f8 25             	cmp    $0x25,%eax$/;"	l
 f28	usertests.asm	/^     f28:	6a 0a                	push   $0xa$/;"	l
 f2a	usertests.asm	/^     f2a:	56                   	push   %esi$/;"	l
-f2b	sh.asm	/^     f2b:	74 17                	je     f44 <printf+0x54>$/;"	l
+f2b	sh.asm	/^     f2b:	8d 45 10             	lea    0x10(%ebp),%eax$/;"	l
 f2b	usertests.asm	/^     f2b:	57                   	push   %edi$/;"	l
 f2c	usertests.asm	/^     f2c:	e8 72 2a 00 00       	call   39a3 <write>$/;"	l
-f2d	sh.asm	/^     f2d:	83 ec 04             	sub    $0x4,%esp$/;"	l
+f2e	sh.asm	/^     f2e:	83 c6 01             	add    $0x1,%esi$/;"	l
 f3	getmaxpid_test.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
-f3	getnumproc_test.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
-f3	getprocinfo_test.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
-f3	hello_test.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
-f3	helloname_test.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
+f3	getnumproc_test.asm	/^  f3:	fc                   	cld    $/;"	l
+f3	getprocinfo_test.asm	/^  f3:	74 eb                	je     e0 <strcmp+0x20>$/;"	l
+f3	hello_test.asm	/^  f3:	fc                   	cld    $/;"	l
+f3	helloname_test.asm	/^  f3:	89 c8                	mov    %ecx,%eax$/;"	l
 f3	ls.asm	/^  f3:	5d                   	pop    %ebp$/;"	l
 f3	seqdec_prio.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
 f3	seqinc_prio.asm	/^  f3:	75 16                	jne    10b <strchr+0x2b>$/;"	l
 f3	usertests.asm	/^      f3:	e8 08 29 00 00       	call   2a00 <dirfile>$/;"	l
-f30	sh.asm	/^     f30:	88 5d e7             	mov    %bl,-0x19(%ebp)$/;"	l
+f31	sh.asm	/^     f31:	8d 7d e7             	lea    -0x19(%ebp),%edi$/;"	l
 f31	usertests.asm	/^     f31:	83 c4 10             	add    $0x10,%esp$/;"	l
-f33	sh.asm	/^     f33:	6a 01                	push   $0x1$/;"	l
+f34	sh.asm	/^     f34:	31 d2                	xor    %edx,%edx$/;"	l
 f34	usertests.asm	/^     f34:	83 f8 0a             	cmp    $0xa,%eax$/;"	l
-f35	sh.asm	/^     f35:	57                   	push   %edi$/;"	l
-f36	sh.asm	/^     f36:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
+f36	sh.asm	/^     f36:	89 45 d0             	mov    %eax,-0x30(%ebp)$/;"	l
 f37	usertests.asm	/^     f37:	74 e7                	je     f20 <sharedfd+0x70>$/;"	l
-f39	sh.asm	/^     f39:	e8 75 fe ff ff       	call   db3 <write>$/;"	l
+f39	sh.asm	/^     f39:	eb 33                	jmp    f6e <printf+0x5e>$/;"	l
 f39	usertests.asm	/^     f39:	83 ec 08             	sub    $0x8,%esp$/;"	l
-f3c	usertests.asm	/^     f3c:	68 74 4f 00 00       	push   $0x4f74$/;"	l
-f3e	sh.asm	/^     f3e:	8b 55 d4             	mov    -0x2c(%ebp),%edx$/;"	l
+f3b	sh.asm	/^     f3b:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+f3c	usertests.asm	/^     f3c:	68 94 4f 00 00       	push   $0x4f94$/;"	l
+f3f	sh.asm	/^     f3f:	90                   	nop$/;"	l
+f4	clear.asm	/^  f4:	55                   	push   %ebp$/;"	l
 f4	echo.asm	/^  f4:	5b                   	pop    %ebx$/;"	l
+f4	getnumproc_test.asm	/^  f4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
 f4	grep.asm	/^  f4:	84 d2                	test   %dl,%dl$/;"	l
+f4	hello_test.asm	/^  f4:	f3 aa                	rep stos %al,%es:(%edi)$/;"	l
 f4	init.asm	/^  f4:	55                   	push   %ebp$/;"	l
 f4	kill.asm	/^  f4:	55                   	push   %ebp$/;"	l
 f4	ls.asm	/^  f4:	c3                   	ret    $/;"	l
 f4	mkdir.asm	/^  f4:	5b                   	pop    %ebx$/;"	l
 f4	rm.asm	/^  f4:	5b                   	pop    %ebx$/;"	l
 f4	zombie.asm	/^  f4:	55                   	push   %ebp$/;"	l
-f41	sh.asm	/^     f41:	83 c4 10             	add    $0x10,%esp$/;"	l
+f40	sh.asm	/^     f40:	89 55 d4             	mov    %edx,-0x2c(%ebp)$/;"	l
 f41	usertests.asm	/^     f41:	6a 01                	push   $0x1$/;"	l
-f43	usertests.asm	/^     f43:	e8 98 2b 00 00       	call   3ae0 <printf>$/;"	l
-f44	sh.asm	/^     f44:	0f b6 1e             	movzbl (%esi),%ebx$/;"	l
-f47	sh.asm	/^     f47:	83 c6 01             	add    $0x1,%esi$/;"	l
+f43	sh.asm	/^     f43:	ba 25 00 00 00       	mov    $0x25,%edx$/;"	l
+f43	usertests.asm	/^     f43:	e8 b8 2b 00 00       	call   3b00 <printf>$/;"	l
+f48	sh.asm	/^     f48:	83 f8 25             	cmp    $0x25,%eax$/;"	l
 f48	usertests.asm	/^     f48:	83 c4 10             	add    $0x10,%esp$/;"	l
-f4a	sh.asm	/^     f4a:	84 db                	test   %bl,%bl$/;"	l
+f4b	sh.asm	/^     f4b:	74 17                	je     f64 <printf+0x54>$/;"	l
 f4b	usertests.asm	/^     f4b:	8b 4d d4             	mov    -0x2c(%ebp),%ecx$/;"	l
-f4c	sh.asm	/^     f4c:	74 71                	je     fbf <printf+0xcf>$/;"	l
-f4e	sh.asm	/^     f4e:	0f be cb             	movsbl %bl,%ecx$/;"	l
+f4d	sh.asm	/^     f4d:	83 ec 04             	sub    $0x4,%esp$/;"	l
 f4e	usertests.asm	/^     f4e:	85 c9                	test   %ecx,%ecx$/;"	l
+f5	clear.asm	/^  f5:	89 e5                	mov    %esp,%ebp$/;"	l
 f5	echo.asm	/^  f5:	5d                   	pop    %ebp$/;"	l
 f5	forktest.asm	/^  f5:	6a 01                	push   $0x1$/;"	l
 f5	getmaxpid_test.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
-f5	getnumproc_test.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
-f5	getprocinfo_test.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
-f5	hello_test.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
-f5	helloname_test.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
+f5	getprocinfo_test.asm	/^  f5:	29 d8                	sub    %ebx,%eax$/;"	l
+f5	helloname_test.asm	/^  f5:	5d                   	pop    %ebp$/;"	l
 f5	init.asm	/^  f5:	31 c0                	xor    %eax,%eax$/;"	l
 f5	kill.asm	/^  f5:	89 e5                	mov    %esp,%ebp$/;"	l
 f5	ls.asm	/^  f5:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
@@ -2522,40 +2587,44 @@ f5	seqdec_prio.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
 f5	seqinc_prio.asm	/^  f5:	eb 21                	jmp    118 <strchr+0x38>$/;"	l
 f5	stressfs.asm	/^  f5:	50                   	push   %eax$/;"	l
 f5	zombie.asm	/^  f5:	89 e5                	mov    %esp,%ebp$/;"	l
+f50	sh.asm	/^     f50:	88 5d e7             	mov    %bl,-0x19(%ebp)$/;"	l
 f50	usertests.asm	/^     f50:	0f 84 f5 00 00 00    	je     104b <sharedfd+0x19b>$/;"	l
-f51	sh.asm	/^     f51:	0f b6 c3             	movzbl %bl,%eax$/;"	l
-f54	sh.asm	/^     f54:	85 d2                	test   %edx,%edx$/;"	l
-f56	sh.asm	/^     f56:	74 c8                	je     f20 <printf+0x30>$/;"	l
+f53	sh.asm	/^     f53:	6a 01                	push   $0x1$/;"	l
+f55	sh.asm	/^     f55:	57                   	push   %edi$/;"	l
+f56	sh.asm	/^     f56:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
 f56	usertests.asm	/^     f56:	e8 30 2a 00 00       	call   398b <wait>$/;"	l
-f58	sh.asm	/^     f58:	83 fa 25             	cmp    $0x25,%edx$/;"	l
-f5b	sh.asm	/^     f5b:	75 e7                	jne    f44 <printf+0x54>$/;"	l
+f59	sh.asm	/^     f59:	e8 55 fe ff ff       	call   db3 <write>$/;"	l
 f5b	usertests.asm	/^     f5b:	83 ec 0c             	sub    $0xc,%esp$/;"	l
-f5d	sh.asm	/^     f5d:	83 f8 64             	cmp    $0x64,%eax$/;"	l
+f5e	sh.asm	/^     f5e:	8b 55 d4             	mov    -0x2c(%ebp),%edx$/;"	l
 f5e	usertests.asm	/^     f5e:	31 db                	xor    %ebx,%ebx$/;"	l
 f6	echo.asm	/^  f6:	c3                   	ret    $/;"	l
+f6	getnumproc_test.asm	/^  f6:	89 d0                	mov    %edx,%eax$/;"	l
 f6	grep.asm	/^  f6:	74 0c                	je     104 <matchstar+0x44>$/;"	l
+f6	hello_test.asm	/^  f6:	89 d0                	mov    %edx,%eax$/;"	l
+f6	helloname_test.asm	/^  f6:	c3                   	ret    $/;"	l
 f6	mkdir.asm	/^  f6:	c3                   	ret    $/;"	l
 f6	rm.asm	/^  f6:	c3                   	ret    $/;"	l
 f6	sh.asm	/^      f6:	e8 c5 09 00 00       	call   ac0 <parsecmd>$/;"	l
 f6	stressfs.asm	/^  f6:	e8 e8 02 00 00       	call   3e3 <open>$/;"	l
-f60	sh.asm	/^     f60:	0f 84 9a 00 00 00    	je     1000 <printf+0x110>$/;"	l
 f60	usertests.asm	/^     f60:	57                   	push   %edi$/;"	l
+f61	sh.asm	/^     f61:	83 c4 10             	add    $0x10,%esp$/;"	l
 f61	usertests.asm	/^     f61:	8d 7d e8             	lea    -0x18(%ebp),%edi$/;"	l
+f64	sh.asm	/^     f64:	0f b6 1e             	movzbl (%esi),%ebx$/;"	l
 f64	usertests.asm	/^     f64:	e8 42 2a 00 00       	call   39ab <close>$/;"	l
-f66	sh.asm	/^     f66:	81 e1 f7 00 00 00    	and    $0xf7,%ecx$/;"	l
+f67	sh.asm	/^     f67:	83 c6 01             	add    $0x1,%esi$/;"	l
 f69	usertests.asm	/^     f69:	58                   	pop    %eax$/;"	l
+f6a	sh.asm	/^     f6a:	84 db                	test   %bl,%bl$/;"	l
 f6a	usertests.asm	/^     f6a:	5a                   	pop    %edx$/;"	l
 f6b	usertests.asm	/^     f6b:	6a 00                	push   $0x0$/;"	l
-f6c	sh.asm	/^     f6c:	83 f9 70             	cmp    $0x70,%ecx$/;"	l
-f6d	usertests.asm	/^     f6d:	68 83 42 00 00       	push   $0x4283$/;"	l
-f6f	sh.asm	/^     f6f:	74 5f                	je     fd0 <printf+0xe0>$/;"	l
+f6c	sh.asm	/^     f6c:	74 71                	je     fdf <printf+0xcf>$/;"	l
+f6d	usertests.asm	/^     f6d:	68 a3 42 00 00       	push   $0x42a3$/;"	l
+f6e	sh.asm	/^     f6e:	0f be cb             	movsbl %bl,%ecx$/;"	l
 f7	cat.asm	/^  f7:	6a 01                	push   $0x1$/;"	l
+f7	clear.asm	/^  f7:	57                   	push   %edi$/;"	l
 f7	echo.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 f7	forktest.asm	/^  f7:	e8 d7 02 00 00       	call   3d3 <write>$/;"	l
 f7	getmaxpid_test.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-f7	getnumproc_test.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-f7	getprocinfo_test.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-f7	hello_test.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+f7	getprocinfo_test.asm	/^  f7:	5b                   	pop    %ebx$/;"	l
 f7	helloname_test.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 f7	init.asm	/^  f7:	89 e5                	mov    %esp,%ebp$/;"	l
 f7	kill.asm	/^  f7:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
@@ -2565,90 +2634,101 @@ f7	seqdec_prio.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;
 f7	seqinc_prio.asm	/^  f7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 f7	wc.asm	/^  f7:	83 c7 01             	add    $0x1,%edi$/;"	l
 f7	zombie.asm	/^  f7:	57                   	push   %edi$/;"	l
-f71	sh.asm	/^     f71:	83 f8 73             	cmp    $0x73,%eax$/;"	l
+f71	sh.asm	/^     f71:	0f b6 c3             	movzbl %bl,%eax$/;"	l
 f72	usertests.asm	/^     f72:	e8 4c 2a 00 00       	call   39c3 <open>$/;"	l
-f74	sh.asm	/^     f74:	0f 84 d6 00 00 00    	je     1050 <printf+0x160>$/;"	l
+f74	sh.asm	/^     f74:	85 d2                	test   %edx,%edx$/;"	l
+f76	sh.asm	/^     f76:	74 c8                	je     f40 <printf+0x30>$/;"	l
 f77	usertests.asm	/^     f77:	83 c4 10             	add    $0x10,%esp$/;"	l
-f7a	sh.asm	/^     f7a:	83 f8 63             	cmp    $0x63,%eax$/;"	l
+f78	sh.asm	/^     f78:	83 fa 25             	cmp    $0x25,%edx$/;"	l
 f7a	usertests.asm	/^     f7a:	31 d2                	xor    %edx,%edx$/;"	l
+f7b	sh.asm	/^     f7b:	75 e7                	jne    f64 <printf+0x54>$/;"	l
 f7c	usertests.asm	/^     f7c:	89 45 d0             	mov    %eax,-0x30(%ebp)$/;"	l
-f7d	sh.asm	/^     f7d:	0f 84 8d 00 00 00    	je     1010 <printf+0x120>$/;"	l
+f7d	sh.asm	/^     f7d:	83 f8 64             	cmp    $0x64,%eax$/;"	l
 f7f	usertests.asm	/^     f7f:	85 c0                	test   %eax,%eax$/;"	l
+f8	clear.asm	/^  f8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+f8	getnumproc_test.asm	/^  f8:	5f                   	pop    %edi$/;"	l
+f8	getprocinfo_test.asm	/^  f8:	5d                   	pop    %ebp$/;"	l
 f8	grep.asm	/^  f8:	83 c7 01             	add    $0x1,%edi$/;"	l
+f8	hello_test.asm	/^  f8:	5f                   	pop    %edi$/;"	l
 f8	ln.asm	/^  f8:	83 c0 01             	add    $0x1,%eax$/;"	l
 f8	usertests.asm	/^      f8:	e8 03 2b 00 00       	call   2c00 <iref>$/;"	l
 f8	zombie.asm	/^  f8:	8b 55 08             	mov    0x8(%ebp),%edx$/;"	l
+f80	sh.asm	/^     f80:	0f 84 9a 00 00 00    	je     1020 <printf+0x110>$/;"	l
 f81	usertests.asm	/^     f81:	0f 88 aa 00 00 00    	js     1031 <sharedfd+0x181>$/;"	l
-f83	sh.asm	/^     f83:	83 f8 25             	cmp    $0x25,%eax$/;"	l
-f86	sh.asm	/^     f86:	0f 84 b4 00 00 00    	je     1040 <printf+0x150>$/;"	l
+f86	sh.asm	/^     f86:	81 e1 f7 00 00 00    	and    $0xf7,%ecx$/;"	l
 f87	usertests.asm	/^     f87:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
-f8c	sh.asm	/^     f8c:	83 ec 04             	sub    $0x4,%esp$/;"	l
+f8c	sh.asm	/^     f8c:	83 f9 70             	cmp    $0x70,%ecx$/;"	l
 f8e	usertests.asm	/^     f8e:	66 90                	xchg   %ax,%ax$/;"	l
-f8f	sh.asm	/^     f8f:	c6 45 e7 25          	movb   $0x25,-0x19(%ebp)$/;"	l
-f9	cat.asm	/^  f9:	e8 d2 03 00 00       	call   4d0 <printf>$/;"	l
+f8f	sh.asm	/^     f8f:	74 5f                	je     ff0 <printf+0xe0>$/;"	l
+f9	cat.asm	/^  f9:	e8 f2 03 00 00       	call   4f0 <printf>$/;"	l
+f9	getnumproc_test.asm	/^  f9:	5d                   	pop    %ebp$/;"	l
+f9	getprocinfo_test.asm	/^  f9:	c3                   	ret    $/;"	l
+f9	hello_test.asm	/^  f9:	5d                   	pop    %ebp$/;"	l
 f9	init.asm	/^  f9:	53                   	push   %ebx$/;"	l
 f90	usertests.asm	/^     f90:	83 ec 04             	sub    $0x4,%esp$/;"	l
-f93	sh.asm	/^     f93:	6a 01                	push   $0x1$/;"	l
+f91	sh.asm	/^     f91:	83 f8 73             	cmp    $0x73,%eax$/;"	l
 f93	usertests.asm	/^     f93:	89 55 d4             	mov    %edx,-0x2c(%ebp)$/;"	l
-f95	sh.asm	/^     f95:	57                   	push   %edi$/;"	l
-f96	sh.asm	/^     f96:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
+f94	sh.asm	/^     f94:	0f 84 d6 00 00 00    	je     1070 <printf+0x160>$/;"	l
 f96	usertests.asm	/^     f96:	6a 0a                	push   $0xa$/;"	l
 f98	usertests.asm	/^     f98:	56                   	push   %esi$/;"	l
-f99	sh.asm	/^     f99:	e8 15 fe ff ff       	call   db3 <write>$/;"	l
 f99	usertests.asm	/^     f99:	ff 75 d0             	pushl  -0x30(%ebp)$/;"	l
+f9a	sh.asm	/^     f9a:	83 f8 63             	cmp    $0x63,%eax$/;"	l
 f9c	usertests.asm	/^     f9c:	e8 fa 29 00 00       	call   399b <read>$/;"	l
-f9e	sh.asm	/^     f9e:	88 5d e7             	mov    %bl,-0x19(%ebp)$/;"	l
+f9d	sh.asm	/^     f9d:	0f 84 8d 00 00 00    	je     1030 <printf+0x120>$/;"	l
+fa	getnumproc_test.asm	/^  fa:	c3                   	ret    $/;"	l
+fa	getprocinfo_test.asm	/^  fa:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi$/;"	l
+fa	hello_test.asm	/^  fa:	c3                   	ret    $/;"	l
 fa	init.asm	/^  fa:	8b 4d 08             	mov    0x8(%ebp),%ecx$/;"	l
 fa	kill.asm	/^  fa:	80 3a 00             	cmpb   $0x0,(%edx)$/;"	l
 fa	wc.asm	/^  fa:	39 fe                	cmp    %edi,%esi$/;"	l
-fa1	sh.asm	/^     fa1:	83 c4 0c             	add    $0xc,%esp$/;"	l
 fa1	usertests.asm	/^     fa1:	83 c4 10             	add    $0x10,%esp$/;"	l
-fa4	sh.asm	/^     fa4:	6a 01                	push   $0x1$/;"	l
+fa3	sh.asm	/^     fa3:	83 f8 25             	cmp    $0x25,%eax$/;"	l
 fa4	usertests.asm	/^     fa4:	85 c0                	test   %eax,%eax$/;"	l
-fa6	sh.asm	/^     fa6:	83 c6 01             	add    $0x1,%esi$/;"	l
+fa6	sh.asm	/^     fa6:	0f 84 b4 00 00 00    	je     1060 <printf+0x150>$/;"	l
 fa6	usertests.asm	/^     fa6:	7e 28                	jle    fd0 <sharedfd+0x120>$/;"	l
 fa8	usertests.asm	/^     fa8:	8b 55 d4             	mov    -0x2c(%ebp),%edx$/;"	l
-fa9	sh.asm	/^     fa9:	57                   	push   %edi$/;"	l
-faa	sh.asm	/^     faa:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
 fab	usertests.asm	/^     fab:	89 f0                	mov    %esi,%eax$/;"	l
-fad	sh.asm	/^     fad:	e8 01 fe ff ff       	call   db3 <write>$/;"	l
+fac	sh.asm	/^     fac:	83 ec 04             	sub    $0x4,%esp$/;"	l
 fad	usertests.asm	/^     fad:	eb 13                	jmp    fc2 <sharedfd+0x112>$/;"	l
+faf	sh.asm	/^     faf:	c6 45 e7 25          	movb   $0x25,-0x19(%ebp)$/;"	l
 faf	usertests.asm	/^     faf:	90                   	nop$/;"	l
+fb	clear.asm	/^  fb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
+fb	getnumproc_test.asm	/^  fb:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 fb	grep.asm	/^  fb:	39 da                	cmp    %ebx,%edx$/;"	l
+fb	hello_test.asm	/^  fb:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 fb	ln.asm	/^  fb:	80 3c 02 00          	cmpb   $0x0,(%edx,%eax,1)$/;"	l
 fb	sh.asm	/^      fb:	89 04 24             	mov    %eax,(%esp)$/;"	l
 fb	stressfs.asm	/^  fb:	83 c4 10             	add    $0x10,%esp$/;"	l
 fb	zombie.asm	/^  fb:	8b 4d 10             	mov    0x10(%ebp),%ecx$/;"	l
 fb0	usertests.asm	/^     fb0:	80 f9 70             	cmp    $0x70,%cl$/;"	l
-fb2	sh.asm	/^     fb2:	0f b6 5e ff          	movzbl -0x1(%esi),%ebx$/;"	l
+fb3	sh.asm	/^     fb3:	6a 01                	push   $0x1$/;"	l
 fb3	usertests.asm	/^     fb3:	0f 94 c1             	sete   %cl$/;"	l
-fb6	sh.asm	/^     fb6:	83 c4 10             	add    $0x10,%esp$/;"	l
+fb5	sh.asm	/^     fb5:	57                   	push   %edi$/;"	l
+fb6	sh.asm	/^     fb6:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
 fb6	usertests.asm	/^     fb6:	0f b6 c9             	movzbl %cl,%ecx$/;"	l
-fb9	sh.asm	/^     fb9:	31 d2                	xor    %edx,%edx$/;"	l
+fb9	sh.asm	/^     fb9:	e8 f5 fd ff ff       	call   db3 <write>$/;"	l
 fb9	usertests.asm	/^     fb9:	01 cb                	add    %ecx,%ebx$/;"	l
-fbb	sh.asm	/^     fbb:	84 db                	test   %bl,%bl$/;"	l
 fbb	usertests.asm	/^     fbb:	83 c0 01             	add    $0x1,%eax$/;"	l
-fbd	sh.asm	/^     fbd:	75 8f                	jne    f4e <printf+0x5e>$/;"	l
+fbe	sh.asm	/^     fbe:	88 5d e7             	mov    %bl,-0x19(%ebp)$/;"	l
 fbe	usertests.asm	/^     fbe:	39 c7                	cmp    %eax,%edi$/;"	l
-fbf	sh.asm	/^     fbf:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
 fc	forktest.asm	/^  fc:	e8 b2 02 00 00       	call   3b3 <exit>$/;"	l
 fc	ls.asm	/^  fc:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 fc	wc.asm	/^  fc:	74 42                	je     140 <wc+0xa0>$/;"	l
 fc0	usertests.asm	/^     fc0:	74 ce                	je     f90 <sharedfd+0xe0>$/;"	l
-fc2	sh.asm	/^     fc2:	5b                   	pop    %ebx$/;"	l
+fc1	sh.asm	/^     fc1:	83 c4 0c             	add    $0xc,%esp$/;"	l
 fc2	usertests.asm	/^     fc2:	0f b6 08             	movzbl (%eax),%ecx$/;"	l
-fc3	sh.asm	/^     fc3:	5e                   	pop    %esi$/;"	l
-fc4	sh.asm	/^     fc4:	5f                   	pop    %edi$/;"	l
-fc5	sh.asm	/^     fc5:	5d                   	pop    %ebp$/;"	l
+fc4	sh.asm	/^     fc4:	6a 01                	push   $0x1$/;"	l
 fc5	usertests.asm	/^     fc5:	80 f9 63             	cmp    $0x63,%cl$/;"	l
-fc6	sh.asm	/^     fc6:	c3                   	ret    $/;"	l
-fc7	sh.asm	/^     fc7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+fc6	sh.asm	/^     fc6:	83 c6 01             	add    $0x1,%esi$/;"	l
 fc8	usertests.asm	/^     fc8:	75 e6                	jne    fb0 <sharedfd+0x100>$/;"	l
+fc9	sh.asm	/^     fc9:	57                   	push   %edi$/;"	l
+fca	sh.asm	/^     fca:	ff 75 08             	pushl  0x8(%ebp)$/;"	l
 fca	usertests.asm	/^     fca:	83 c2 01             	add    $0x1,%edx$/;"	l
+fcd	sh.asm	/^     fcd:	e8 e1 fd ff ff       	call   db3 <write>$/;"	l
 fcd	usertests.asm	/^     fcd:	eb ec                	jmp    fbb <sharedfd+0x10b>$/;"	l
-fce	sh.asm	/^     fce:	66 90                	xchg   %ax,%ax$/;"	l
 fcf	usertests.asm	/^     fcf:	90                   	nop$/;"	l
 fd	cat.asm	/^  fd = open(n, O_RDONLY);$/;"	d
+fd	clear.asm	/^  fd = open(n, O_RDONLY);$/;"	d
 fd	echo.asm	/^  fd = open(n, O_RDONLY);$/;"	d
 fd	forktest.asm	/^  fd = open(n, O_RDONLY);$/;"	d
 fd	getmaxpid_test.asm	/^  fd = open(n, O_RDONLY);$/;"	d
@@ -2716,23 +2796,22 @@ fd	usertests.asm	/^  fd = open(n, O_RDONLY);$/;"	d
 fd	wc.asm	/^  fd = open(n, O_RDONLY);$/;"	d
 fd	zombie.asm	/^  fd = open(n, O_RDONLY);$/;"	d
 fd0	kernel.asm	/^  fd0 = -1;$/;"	d
-fd0	sh.asm	/^     fd0:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 fd0	usertests.asm	/^     fd0:	83 ec 0c             	sub    $0xc,%esp$/;"	l
 fd1	usertests.asm	/^  fd1 = open("unlinkread", O_CREATE | O_RDWR);$/;"	d
-fd3	sh.asm	/^     fd3:	b9 10 00 00 00       	mov    $0x10,%ecx$/;"	l
+fd2	sh.asm	/^     fd2:	0f b6 5e ff          	movzbl -0x1(%esi),%ebx$/;"	l
 fd3	usertests.asm	/^     fd3:	ff 75 d0             	pushl  -0x30(%ebp)$/;"	l
+fd6	sh.asm	/^     fd6:	83 c4 10             	add    $0x10,%esp$/;"	l
 fd6	usertests.asm	/^     fd6:	e8 d0 29 00 00       	call   39ab <close>$/;"	l
-fd8	sh.asm	/^     fd8:	6a 00                	push   $0x0$/;"	l
-fda	sh.asm	/^     fda:	8b 5d d0             	mov    -0x30(%ebp),%ebx$/;"	l
+fd9	sh.asm	/^     fd9:	31 d2                	xor    %edx,%edx$/;"	l
 fdalloc	sysfile.c	/^fdalloc(struct file *f)$/;"	f	typeref:typename:int	file:
-fdb	usertests.asm	/^     fdb:	c7 04 24 83 42 00 00 	movl   $0x4283,(%esp)$/;"	l
-fdd	sh.asm	/^     fdd:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
+fdb	sh.asm	/^     fdb:	84 db                	test   %bl,%bl$/;"	l
+fdb	usertests.asm	/^     fdb:	c7 04 24 a3 42 00 00 	movl   $0x42a3,(%esp)$/;"	l
+fdd	sh.asm	/^     fdd:	75 8f                	jne    f6e <printf+0x5e>$/;"	l
+fdf	sh.asm	/^     fdf:	8d 65 f4             	lea    -0xc(%ebp),%esp$/;"	l
 fe	cat.asm	/^  fe:	e8 70 02 00 00       	call   373 <exit>$/;"	l
+fe	clear.asm	/^  fe:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
 fe	echo.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
 fe	getmaxpid_test.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
-fe	getnumproc_test.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
-fe	getprocinfo_test.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
-fe	hello_test.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
 fe	helloname_test.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
 fe	mkdir.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
 fe	rm.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
@@ -2740,31 +2819,36 @@ fe	seqdec_prio.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
 fe	seqinc_prio.asm	/^  fe:	66 90                	xchg   %ax,%ax$/;"	l
 fe	sh.asm	/^      fe:	e8 7d 00 00 00       	call   180 <runcmd>$/;"	l
 fe	stressfs.asm	/^  fe:	89 c7                	mov    %eax,%edi$/;"	l
-fe	wc.asm	/^  fe:	0f be 87 00 0c 00 00 	movsbl 0xc00(%edi),%eax$/;"	l
+fe	wc.asm	/^  fe:	0f be 87 20 0c 00 00 	movsbl 0xc20(%edi),%eax$/;"	l
 fe	zombie.asm	/^  fe:	8b 45 0c             	mov    0xc(%ebp),%eax$/;"	l
-fe0	sh.asm	/^     fe0:	8b 13                	mov    (%ebx),%edx$/;"	l
-fe2	sh.asm	/^     fe2:	e8 59 fe ff ff       	call   e40 <printint>$/;"	l
+fe2	sh.asm	/^     fe2:	5b                   	pop    %ebx$/;"	l
 fe2	usertests.asm	/^     fe2:	e8 ec 29 00 00       	call   39d3 <unlink>$/;"	l
-fe7	sh.asm	/^     fe7:	89 d8                	mov    %ebx,%eax$/;"	l
+fe3	sh.asm	/^     fe3:	5e                   	pop    %esi$/;"	l
+fe4	sh.asm	/^     fe4:	5f                   	pop    %edi$/;"	l
+fe5	sh.asm	/^     fe5:	5d                   	pop    %ebp$/;"	l
+fe6	sh.asm	/^     fe6:	c3                   	ret    $/;"	l
+fe7	sh.asm	/^     fe7:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
 fe7	usertests.asm	/^     fe7:	8b 55 d4             	mov    -0x2c(%ebp),%edx$/;"	l
-fe9	sh.asm	/^     fe9:	83 c4 10             	add    $0x10,%esp$/;"	l
 fea	usertests.asm	/^     fea:	83 c4 10             	add    $0x10,%esp$/;"	l
 feature	mp.h	/^  uint feature;                 \/\/ feature flags from CPUID instruction$/;"	m	struct:mpproc	typeref:typename:uint
-fec	sh.asm	/^     fec:	31 d2                	xor    %edx,%edx$/;"	l
 fed	usertests.asm	/^     fed:	81 fa 10 27 00 00    	cmp    $0x2710,%edx$/;"	l
-fee	sh.asm	/^     fee:	83 c0 04             	add    $0x4,%eax$/;"	l
+fee	sh.asm	/^     fee:	66 90                	xchg   %ax,%ax$/;"	l
 fetchint	syscall.c	/^fetchint(uint addr, int *ip)$/;"	f	typeref:typename:int
 fetchstr	syscall.c	/^fetchstr(uint addr, char **pp)$/;"	f	typeref:typename:int
+ff	getnumproc_test.asm	/^  ff:	90                   	nop$/;"	l
 ff	grep.asm	/^  ff:	83 fb 2e             	cmp    $0x2e,%ebx$/;"	l
+ff	hello_test.asm	/^  ff:	90                   	nop$/;"	l
 ff	kernel.asm	/^  ff = *f;$/;"	d
 ff	kill.asm	/^  ff:	31 c0                	xor    %eax,%eax$/;"	l
 ff	ln.asm	/^  ff:	89 c1                	mov    %eax,%ecx$/;"	l
-ff1	sh.asm	/^     ff1:	89 45 d0             	mov    %eax,-0x30(%ebp)$/;"	l
+ff0	sh.asm	/^     ff0:	83 ec 0c             	sub    $0xc,%esp$/;"	l
+ff3	sh.asm	/^     ff3:	b9 10 00 00 00       	mov    $0x10,%ecx$/;"	l
 ff3	usertests.asm	/^     ff3:	75 5b                	jne    1050 <sharedfd+0x1a0>$/;"	l
-ff4	sh.asm	/^     ff4:	e9 4b ff ff ff       	jmp    f44 <printf+0x54>$/;"	l
 ff5	usertests.asm	/^     ff5:	81 fb 10 27 00 00    	cmp    $0x2710,%ebx$/;"	l
-ff9	sh.asm	/^     ff9:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi$/;"	l
+ff8	sh.asm	/^     ff8:	6a 00                	push   $0x0$/;"	l
+ffa	sh.asm	/^     ffa:	8b 5d d0             	mov    -0x30(%ebp),%ebx$/;"	l
 ffb	usertests.asm	/^     ffb:	75 53                	jne    1050 <sharedfd+0x1a0>$/;"	l
+ffd	sh.asm	/^     ffd:	8b 45 08             	mov    0x8(%ebp),%eax$/;"	l
 ffd	usertests.asm	/^     ffd:	83 ec 08             	sub    $0x8,%esp$/;"	l
 file	file.c	/^  struct file file[NFILE];$/;"	m	struct:__anonfd762eb60108	typeref:struct:file[]	file:
 file	file.h	/^struct file {$/;"	s
@@ -2778,7 +2862,7 @@ filestat	file.c	/^filestat(struct file *f, struct stat *st)$/;"	f	typeref:typena
 filesz	elf.h	/^  uint filesz;$/;"	m	struct:proghdr	typeref:typename:uint
 filewrite	file.c	/^filewrite(struct file *f, char *addr, int n)$/;"	f	typeref:typename:int
 fill_rtcdate	lapic.c	/^fill_rtcdate(struct rtcdate *r)$/;"	f	typeref:typename:void	file:
-first	kernel.asm	/^    first = 0;$/;"	d
+first	kernel.asm	/^		first = 0;$/;"	d
 flags	buf.h	/^  int flags;$/;"	m	struct:buf	typeref:typename:int
 flags	elf.h	/^  uint flags;$/;"	m	struct:elfhdr	typeref:typename:uint
 flags	elf.h	/^  uint flags;$/;"	m	struct:proghdr	typeref:typename:uint
@@ -2802,6 +2886,8 @@ freeinode	mkfs.c	/^uint freeinode = 1;$/;"	v	typeref:typename:uint
 freelist	kalloc.c	/^  struct run *freelist;$/;"	m	struct:__anon69d64d0c0108	typeref:struct:run *	file:
 freep	cat.asm	/^      freep = prevp;$/;"	d
 freep	cat.asm	/^  freep = p;$/;"	d
+freep	clear.asm	/^      freep = prevp;$/;"	d
+freep	clear.asm	/^  freep = p;$/;"	d
 freep	echo.asm	/^      freep = prevp;$/;"	d
 freep	echo.asm	/^  freep = p;$/;"	d
 freep	getmaxpid_test.asm	/^      freep = prevp;$/;"	d
@@ -2867,14 +2953,15 @@ growproc	proc.c	/^growproc(int n)$/;"	f	typeref:typename:int
 gs	mmu.h	/^  ushort gs;$/;"	m	struct:taskstate	typeref:typename:ushort
 gs	x86.h	/^  ushort gs;$/;"	m	struct:trapframe	typeref:typename:ushort
 havedisk1	ide.c	/^static int havedisk1;$/;"	v	typeref:typename:int	file:
-havekids	kernel.asm	/^      havekids = 1;$/;"	d
-havekids	kernel.asm	/^    havekids = 0;$/;"	d
+havekids	kernel.asm	/^			havekids = 1;$/;"	d
+havekids	kernel.asm	/^		havekids = 0;$/;"	d
 head	bio.c	/^  struct buf head;$/;"	m	struct:__anon0f27d3d00108	typeref:struct:buf	file:
 header	umalloc.c	/^union header {$/;"	u	file:
 holding	spinlock.c	/^holding(struct spinlock *lock)$/;"	f	typeref:typename:int
 holdingsleep	sleeplock.c	/^holdingsleep(struct sleeplock *lk)$/;"	f	typeref:typename:int
 hour	date.h	/^  uint hour;$/;"	m	struct:rtcdate	typeref:typename:uint
 i	cat.asm	/^  i = 0;$/;"	d
+i	clear.asm	/^  i = 0;$/;"	d
 i	echo.asm	/^  i = 0;$/;"	d
 i	getmaxpid_test.asm	/^  i = 0;$/;"	d
 i	getnumproc_test.asm	/^  i = 0;$/;"	d
@@ -2883,6 +2970,7 @@ i	grep.asm	/^  i = 0;$/;"	d
 i	hello_test.asm	/^  i = 0;$/;"	d
 i	helloname_test.asm	/^  i = 0;$/;"	d
 i	init.asm	/^  i = 0;$/;"	d
+i	kernel.asm	/^	i = 0;$/;"	d
 i	kernel.asm	/^  i = 0;$/;"	d
 i	kill.asm	/^  i = 0;$/;"	d
 i	ln.asm	/^  i = 0;$/;"	d
@@ -2925,7 +3013,7 @@ init	initcode.S	/^init:$/;"	l
 initcode	Makefile	/^initcode: initcode.S$/;"	t
 initlock	spinlock.c	/^initlock(struct spinlock *lk, char *name)$/;"	f	typeref:typename:void
 initlog	log.c	/^initlog(int dev)$/;"	f	typeref:typename:void
-initproc	kernel.asm	/^  initproc = p;$/;"	d
+initproc	kernel.asm	/^	initproc = p;$/;"	d
 initproc	proc.c	/^static struct proc *initproc;$/;"	v	typeref:struct:proc *	file:
 initsleeplock	sleeplock.c	/^initsleeplock(struct sleeplock *lk, char *name)$/;"	f	typeref:typename:void
 inituvm	vm.c	/^inituvm(pde_t *pgdir, char *init, uint sz)$/;"	f	typeref:typename:void
@@ -2937,16 +3025,23 @@ input	console.c	/^} input;$/;"	v	typeref:struct:__anon96a473a90208
 insl	x86.h	/^insl(int port, void *addr, int cnt)$/;"	f	typeref:typename:void
 install_trans	log.c	/^install_trans(void)$/;"	f	typeref:typename:void	file:
 int	cat.asm	/^int$/;"	l
+int	clear.asm	/^int main(int argc, char **argv)$/;"	l
+int	clear.asm	/^int$/;"	l
 int	echo.asm	/^int$/;"	l
 int	forktest.asm	/^int$/;"	l
 int	getmaxpid_test.asm	/^int$/;"	l
+int	getnumproc_test.asm	/^int main(void)$/;"	l
 int	getnumproc_test.asm	/^int$/;"	l
+int	getprocinfo_test.asm	/^int main(void)$/;"	l
 int	getprocinfo_test.asm	/^int$/;"	l
 int	grep.asm	/^int matchstar(int c, char *re, char *text)$/;"	l
 int	grep.asm	/^int$/;"	l
+int	hello_test.asm	/^int main(void)$/;"	l
 int	hello_test.asm	/^int$/;"	l
+int	helloname_test.asm	/^int main(int argc, char **argv)$/;"	l
 int	helloname_test.asm	/^int$/;"	l
 int	init.asm	/^int$/;"	l
+int	kernel.asm	/^int procinfo(int pid, struct processInfo *info)$/;"	l
 int	kernel.asm	/^int$/;"	l
 int	kill.asm	/^int$/;"	l
 int	ln.asm	/^int$/;"	l
@@ -2960,7 +3055,7 @@ int	stressfs.asm	/^int$/;"	l
 int	usertests.asm	/^int$/;"	l
 int	wc.asm	/^int$/;"	l
 int	zombie.asm	/^int$/;"	l
-intena	kernel.asm	/^  intena = mycpu()->intena;$/;"	d
+intena	kernel.asm	/^	intena = mycpu()->intena;$/;"	d
 intena	proc.h	/^  int intena;                  \/\/ Were interrupts enabled before pushcli?$/;"	m	struct:cpu	typeref:typename:int
 inum	file.h	/^  uint inum;          \/\/ Inode number$/;"	m	struct:inode	typeref:typename:uint
 inum	fs.h	/^  ushort inum;$/;"	m	struct:dirent	typeref:typename:ushort
@@ -3053,7 +3148,7 @@ lock	fs.c	/^  struct spinlock lock;$/;"	m	struct:__anon7c96edaf0108	typeref:stru
 lock	kalloc.c	/^  struct spinlock lock;$/;"	m	struct:__anon69d64d0c0108	typeref:struct:spinlock	file:
 lock	log.c	/^  struct spinlock lock;$/;"	m	struct:log	typeref:struct:spinlock	file:
 lock	pipe.c	/^  struct spinlock lock;$/;"	m	struct:pipe	typeref:struct:spinlock	file:
-lock	proc.c	/^  struct spinlock lock;$/;"	m	struct:__anon156e3e2a0108	typeref:struct:spinlock	file:
+lock	proc.c	/^	struct spinlock lock;$/;"	m	struct:__anon156e3e2a0108	typeref:struct:spinlock	file:
 locked	sleeplock.h	/^  uint locked;       \/\/ Is the lock held?$/;"	m	struct:sleeplock	typeref:typename:uint
 locked	spinlock.h	/^  uint locked;       \/\/ Is the lock held?$/;"	m	struct:spinlock	typeref:typename:uint
 locking	console.c	/^  int locking;$/;"	m	struct:__anon96a473a90108	typeref:typename:int	file:
@@ -3077,7 +3172,11 @@ magic	entry.S	/^  #define magic /;"	d	file:
 main	cat.c	/^main(int argc, char *argv[])$/;"	f	typeref:typename:int
 main	echo.c	/^main(int argc, char *argv[])$/;"	f	typeref:typename:int
 main	forktest.c	/^main(void)$/;"	f	typeref:typename:int
+main	getnumproc_test.c	/^int main(void)$/;"	f	typeref:typename:int
+main	getprocinfo_test.c	/^int main(void)$/;"	f	typeref:typename:int
 main	grep.c	/^main(int argc, char *argv[])$/;"	f	typeref:typename:int
+main	hello_test.c	/^int main(void)$/;"	f	typeref:typename:int
+main	helloname_test.c	/^int main(int argc, char **argv)$/;"	f	typeref:typename:int
 main	init.c	/^main(void)$/;"	f	typeref:typename:int
 main	kill.c	/^main(int argc, char **argv)$/;"	f	typeref:typename:int
 main	ln.c	/^main(int argc, char *argv[])$/;"	f	typeref:typename:int
@@ -3134,6 +3233,8 @@ mycpu	proc.c	/^mycpu(void)$/;"	f	typeref:struct:cpu *
 myproc	proc.c	/^myproc(void) {$/;"	f	typeref:struct:proc *
 n	cat.asm	/^    n = n*10 + *s++ - '0';$/;"	d
 n	cat.asm	/^  n = 0;$/;"	d
+n	clear.asm	/^    n = n*10 + *s++ - '0';$/;"	d
+n	clear.asm	/^  n = 0;$/;"	d
 n	echo.asm	/^    n = n*10 + *s++ - '0';$/;"	d
 n	echo.asm	/^  n = 0;$/;"	d
 n	forktest.asm	/^    n = n*10 + *s++ - '0';$/;"	d
@@ -3181,6 +3282,7 @@ n	zombie.asm	/^    n = n*10 + *s++ - '0';$/;"	d
 n	zombie.asm	/^  n = 0;$/;"	d
 n1	kernel.asm	/^        n1 = max;$/;"	d
 name	cat.asm	/^    ret$/;"	l
+name	clear.asm	/^    ret$/;"	l
 name	echo.asm	/^    ret$/;"	l
 name	forktest.asm	/^    ret$/;"	l
 name	fs.h	/^  char name[DIRSIZ];$/;"	m	struct:dirent	typeref:typename:char[]
@@ -3189,6 +3291,7 @@ name	getnumproc_test.asm	/^    ret$/;"	l
 name	getprocinfo_test.asm	/^    ret$/;"	l
 name	grep.asm	/^    ret$/;"	l
 name	hello_test.asm	/^    ret$/;"	l
+name	helloname_test.asm	/^	name = argv[1];$/;"	d
 name	helloname_test.asm	/^    ret$/;"	l
 name	init.asm	/^    ret$/;"	l
 name	kill.asm	/^    ret$/;"	l
@@ -3220,6 +3323,8 @@ ncli	proc.h	/^  int ncli;                    \/\/ Depth of pushcli nesting.$/;"	
 ncpu	mp.c	/^int ncpu;$/;"	v	typeref:typename:int
 neg	cat.asm	/^    neg = 1;$/;"	d
 neg	cat.asm	/^  neg = 0;$/;"	d
+neg	clear.asm	/^    neg = 1;$/;"	d
+neg	clear.asm	/^  neg = 0;$/;"	d
 neg	echo.asm	/^    neg = 1;$/;"	d
 neg	echo.asm	/^  neg = 0;$/;"	d
 neg	getmaxpid_test.asm	/^    neg = 1;$/;"	d
@@ -3277,6 +3382,7 @@ nulterminate	sh.c	/^nulterminate(struct cmd *cmd)$/;"	f	typeref:struct:cmd *
 num	kernel.asm	/^  num = curproc->tf->eax;$/;"	d
 numberContextSwitches	processInfo.h	/^    int numberContextSwitches;$/;"	m	struct:processInfo	typeref:typename:int
 nunits	cat.asm	/^  nunits = (nbytes + sizeof(Header) - 1)\/sizeof(Header) + 1;$/;"	d
+nunits	clear.asm	/^  nunits = (nbytes + sizeof(Header) - 1)\/sizeof(Header) + 1;$/;"	d
 nunits	echo.asm	/^  nunits = (nbytes + sizeof(Header) - 1)\/sizeof(Header) + 1;$/;"	d
 nunits	getmaxpid_test.asm	/^  nunits = (nbytes + sizeof(Header) - 1)\/sizeof(Header) + 1;$/;"	d
 nunits	getnumproc_test.asm	/^  nunits = (nbytes + sizeof(Header) - 1)\/sizeof(Header) + 1;$/;"	d
@@ -3314,6 +3420,7 @@ oldpgdir	kernel.asm	/^  oldpgdir = curproc->pgdir;$/;"	d
 openiputtest	usertests.c	/^openiputtest(void)$/;"	f	typeref:typename:void
 opentest	usertests.c	/^opentest(void)$/;"	f	typeref:typename:void
 os	cat.asm	/^  os = s;$/;"	d
+os	clear.asm	/^  os = s;$/;"	d
 os	echo.asm	/^  os = s;$/;"	d
 os	forktest.asm	/^  os = s;$/;"	d
 os	getmaxpid_test.asm	/^  os = s;$/;"	d
@@ -3341,6 +3448,7 @@ outsl	x86.h	/^outsl(int port, const void *addr, int cnt)$/;"	f	typeref:typename:
 outstanding	log.c	/^  int outstanding; \/\/ how many FS sys calls are executing.$/;"	m	struct:log	typeref:typename:int	file:
 outw	x86.h	/^outw(ushort port, ushort data)$/;"	f	typeref:typename:void
 p	cat.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
+p	clear.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	echo.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	getmaxpid_test.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	getnumproc_test.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
@@ -3351,11 +3459,11 @@ p	grep.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	hello_test.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	helloname_test.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	init.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
+p	kernel.asm	/^	p = allocproc();$/;"	d
+p	kernel.asm	/^	p = c->proc;$/;"	d
 p	kernel.asm	/^    p = ((bda[0x14]<<8)|bda[0x13])*1024;$/;"	d
 p	kernel.asm	/^  p = (char*)PGROUNDUP((uint)vstart);$/;"	d
 p	kernel.asm	/^  p = 0;$/;"	d
-p	kernel.asm	/^  p = allocproc();$/;"	d
-p	kernel.asm	/^  p = c->proc;$/;"	d
 p	kill.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	ln.asm	/^  p = sbrk(nu * sizeof(Header));$/;"	d
 p	ls.asm	/^    p = buf+strlen(buf);$/;"	d
@@ -3424,8 +3532,8 @@ physaddr	mp.h	/^  void *physaddr;               \/\/ phys addr of MP config tabl
 picinit	picirq.c	/^picinit(void)$/;"	f	typeref:typename:void
 pid	forktest.asm	/^    pid = fork();$/;"	d
 pid	init.asm	/^    pid = fork();$/;"	d
-pid	kernel.asm	/^        pid = p->pid;$/;"	d
-pid	kernel.asm	/^  pid = np->pid;$/;"	d
+pid	kernel.asm	/^				pid = p->pid;$/;"	d
+pid	kernel.asm	/^	pid = np->pid;$/;"	d
 pid	proc.h	/^  int pid;                     \/\/ Process ID$/;"	m	struct:proc	typeref:typename:int
 pid	sh.asm	/^  pid = fork();$/;"	d
 pid	sleeplock.h	/^  int pid;           \/\/ Process holding lock$/;"	m	struct:sleeplock	typeref:typename:int
@@ -3456,11 +3564,14 @@ printf	forktest.c	/^printf(int fd, const char *s, ...)$/;"	f	typeref:typename:vo
 printf	printf.c	/^printf(int fd, const char *fmt, ...)$/;"	f	typeref:typename:void
 printint	console.c	/^printint(int xx, int base, int sign)$/;"	f	typeref:typename:void	file:
 printint	printf.c	/^printint(int fd, int xx, int base, int sgn)$/;"	f	typeref:typename:void	file:
-proc	proc.c	/^  struct proc proc[NPROC];$/;"	m	struct:__anon156e3e2a0108	typeref:struct:proc[]	file:
+proc	proc.c	/^	struct proc proc[NPROC];$/;"	m	struct:__anon156e3e2a0108	typeref:struct:proc[]	file:
 proc	proc.h	/^  struct proc *proc;           \/\/ The process running on this cpu or null$/;"	m	struct:cpu	typeref:struct:proc *
 proc	proc.h	/^struct proc {$/;"	s
+proccnt	proc.c	/^proccnt(void)$/;"	f	typeref:typename:int
 procdump	proc.c	/^procdump(void)$/;"	f	typeref:typename:void
 processInfo	processInfo.h	/^struct processInfo$/;"	s
+procinfo	proc.c	/^int procinfo(int pid, struct processInfo *info)$/;"	f	typeref:typename:int
+procpids	proc.c	/^void procpids(int *pids)$/;"	f	typeref:typename:void
 procstate	proc.h	/^enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };$/;"	g
 product	mp.h	/^  uchar product[20];            \/\/ product id$/;"	m	struct:mpconf	typeref:typename:uchar[20]
 proghdr	elf.h	/^struct proghdr {$/;"	s
@@ -3479,6 +3590,7 @@ qemu-nox	Makefile	/^qemu-nox: fs.img xv6.img$/;"	t
 qemu-nox-gdb	Makefile	/^qemu-nox-gdb: fs.img xv6.img .gdbinit$/;"	t
 qnext	buf.h	/^  struct buf *qnext; \/\/ disk queue$/;"	m	struct:buf	typeref:struct:buf *
 r	cat.asm	/^  r = fstat(fd, st);$/;"	d
+r	clear.asm	/^  r = fstat(fd, st);$/;"	d
 r	console.c	/^  uint r;  \/\/ Read index$/;"	m	struct:__anon96a473a90208	typeref:typename:uint	file:
 r	echo.asm	/^  r = fstat(fd, st);$/;"	d
 r	forktest.asm	/^  r = fstat(fd, st);$/;"	d
@@ -3550,6 +3662,8 @@ run	kalloc.c	/^struct run {$/;"	s	file:
 runcmd	sh.c	/^runcmd(struct cmd *cmd)$/;"	f	typeref:typename:void
 s	cat.asm	/^          s = "(null)";$/;"	d
 s	cat.asm	/^        s = (char*)*ap;$/;"	d
+s	clear.asm	/^          s = "(null)";$/;"	d
+s	clear.asm	/^        s = (char*)*ap;$/;"	d
 s	echo.asm	/^          s = "(null)";$/;"	d
 s	echo.asm	/^        s = (char*)*ap;$/;"	d
 s	getmaxpid_test.asm	/^          s = "(null)";$/;"	d
@@ -3631,8 +3745,8 @@ size	umalloc.c	/^    uint size;$/;"	m	struct:header::__anonf5a2dce30108	typeref:
 skipelem	fs.c	/^skipelem(char *path, char *name)$/;"	f	typeref:typename:char *	file:
 sleep	proc.c	/^sleep(void *chan, struct spinlock *lk)$/;"	f	typeref:typename:void
 sleeplock	sleeplock.h	/^struct sleeplock {$/;"	s
+sp	kernel.asm	/^	sp = p->kstack + KSTACKSIZE;$/;"	d
 sp	kernel.asm	/^    sp = (sp - (strlen(argv[argc]) + 1)) & ~3;$/;"	d
-sp	kernel.asm	/^  sp = p->kstack + KSTACKSIZE;$/;"	d
 specrev	mp.h	/^  uchar specrev;                \/\/ [14]$/;"	m	struct:mp	typeref:typename:uchar
 spin	bootasm.S	/^spin:$/;"	l
 spin	bootblock.asm	/^spin:$/;"	l
@@ -3640,6 +3754,7 @@ spin	entryother.S	/^spin:$/;"	l
 spin	entryother.asm	/^spin:$/;"	l
 spinlock	spinlock.h	/^struct spinlock {$/;"	s
 src	cat.asm	/^  src = vsrc;$/;"	d
+src	clear.asm	/^  src = vsrc;$/;"	d
 src	echo.asm	/^  src = vsrc;$/;"	d
 src	forktest.asm	/^  src = vsrc;$/;"	d
 src	getmaxpid_test.asm	/^  src = vsrc;$/;"	d
@@ -3687,6 +3802,9 @@ stat	ulib.c	/^stat(const char *n, struct stat *st)$/;"	f	typeref:typename:int
 state	cat.asm	/^        state = '%';$/;"	d
 state	cat.asm	/^      state = 0;$/;"	d
 state	cat.asm	/^  state = 0;$/;"	d
+state	clear.asm	/^        state = '%';$/;"	d
+state	clear.asm	/^      state = 0;$/;"	d
+state	clear.asm	/^  state = 0;$/;"	d
 state	echo.asm	/^        state = '%';$/;"	d
 state	echo.asm	/^      state = 0;$/;"	d
 state	echo.asm	/^  state = 0;$/;"	d
@@ -3711,7 +3829,7 @@ state	helloname_test.asm	/^  state = 0;$/;"	d
 state	init.asm	/^        state = '%';$/;"	d
 state	init.asm	/^      state = 0;$/;"	d
 state	init.asm	/^  state = 0;$/;"	d
-state	kernel.asm	/^      state = "???";$/;"	d
+state	kernel.asm	/^			state = "???";$/;"	d
 state	kill.asm	/^        state = '%';$/;"	d
 state	kill.asm	/^      state = 0;$/;"	d
 state	kill.asm	/^  state = 0;$/;"	d
@@ -3756,6 +3874,10 @@ static	cat.asm	/^static Header *freep;$/;"	l
 static	cat.asm	/^static Header base;$/;"	l
 static	cat.asm	/^static inline void$/;"	l
 static	cat.asm	/^static void$/;"	l
+static	clear.asm	/^static Header *freep;$/;"	l
+static	clear.asm	/^static Header base;$/;"	l
+static	clear.asm	/^static inline void$/;"	l
+static	clear.asm	/^static void$/;"	l
 static	echo.asm	/^static Header *freep;$/;"	l
 static	echo.asm	/^static Header base;$/;"	l
 static	echo.asm	/^static inline void$/;"	l
@@ -3789,13 +3911,13 @@ static	init.asm	/^static Header *freep;$/;"	l
 static	init.asm	/^static Header base;$/;"	l
 static	init.asm	/^static inline void$/;"	l
 static	init.asm	/^static void$/;"	l
+static	kernel.asm	/^	static struct proc*$/;"	t
 static	kernel.asm	/^static inline uint$/;"	l
 static	kernel.asm	/^static inline void$/;"	l
 static	kernel.asm	/^static int$/;"	l
 static	kernel.asm	/^static pte_t *$/;"	l
 static	kernel.asm	/^static struct inode*$/;"	t
 static	kernel.asm	/^static struct mp*$/;"	t
-static	kernel.asm	/^static struct proc*$/;"	t
 static	kernel.asm	/^static uint$/;"	l
 static	kernel.asm	/^static void$/;"	l
 static	kill.asm	/^static Header *freep;$/;"	l
@@ -3858,8 +3980,8 @@ strlen	string.c	/^strlen(const char *s)$/;"	f	typeref:typename:int
 strlen	ulib.c	/^strlen(const char *s)$/;"	f	typeref:typename:uint
 strncmp	string.c	/^strncmp(const char *p, const char *q, uint n)$/;"	f	typeref:typename:int
 strncpy	string.c	/^strncpy(char *s, const char *t, int n)$/;"	f	typeref:typename:char *
+struct	kernel.asm	/^	struct proc *p;$/;"	l
 struct	kernel.asm	/^  struct proc *curproc = myproc();$/;"	l
-struct	kernel.asm	/^  struct proc *p;$/;"	l
 subdir	usertests.c	/^subdir(void)$/;"	f	typeref:typename:void
 sum	kernel.asm	/^  sum = 0;$/;"	d
 sum	mp.c	/^sum(uchar *addr, int len)$/;"	f	typeref:typename:uchar	file:
@@ -3876,7 +3998,12 @@ sys_exec	sysfile.c	/^sys_exec(void)$/;"	f	typeref:typename:int
 sys_exit	sysproc.c	/^sys_exit(void)$/;"	f	typeref:typename:int
 sys_fork	sysproc.c	/^sys_fork(void)$/;"	f	typeref:typename:int
 sys_fstat	sysfile.c	/^sys_fstat(void)$/;"	f	typeref:typename:int
+sys_get_num_proc	sysproc.c	/^sys_get_num_proc(void) {$/;"	f	typeref:typename:int
+sys_get_proc_info	sysproc.c	/^sys_get_proc_info(void) {$/;"	f	typeref:typename:int
+sys_get_proc_pids	sysproc.c	/^sys_get_proc_pids(void) {$/;"	f	typeref:typename:int
 sys_getpid	sysproc.c	/^sys_getpid(void)$/;"	f	typeref:typename:int
+sys_hello	sysproc.c	/^sys_hello(void) {$/;"	f	typeref:typename:int
+sys_hello_name	sysproc.c	/^sys_hello_name(void) {$/;"	f	typeref:typename:int
 sys_kill	sysproc.c	/^sys_kill(void)$/;"	f	typeref:typename:int
 sys_link	sysfile.c	/^sys_link(void)$/;"	f	typeref:typename:int
 sys_mkdir	sysfile.c	/^sys_mkdir(void)$/;"	f	typeref:typename:int
@@ -3892,8 +4019,8 @@ sys_wait	sysproc.c	/^sys_wait(void)$/;"	f	typeref:typename:int
 sys_write	sysfile.c	/^sys_write(void)$/;"	f	typeref:typename:int
 syscall	syscall.c	/^syscall(void)$/;"	f	typeref:typename:void
 syscalls	syscall.c	/^static int (*syscalls[])(void) = {$/;"	v	typeref:typename:int (* [])(void)	file:
+sz	kernel.asm	/^	sz = curproc->sz;$/;"	d
 sz	kernel.asm	/^  sz = 0;$/;"	d
-sz	kernel.asm	/^  sz = curproc->sz;$/;"	d
 sz	proc.h	/^  uint sz;                     \/\/ Size of process memory (bytes)$/;"	m	struct:proc	typeref:typename:uint
 t	mmu.h	/^  ushort t;          \/\/ Trap on task switch$/;"	m	struct:taskstate	typeref:typename:ushort
 tags	Makefile	/^tags: $(OBJS) entryother.S _init$/;"	t
@@ -3902,7 +4029,7 @@ target	kernel.asm	/^  target = n;$/;"	d
 taskstate	mmu.h	/^struct taskstate {$/;"	s
 tf	proc.h	/^  struct trapframe *tf;        \/\/ Trap frame for current syscall$/;"	m	struct:proc	typeref:struct:trapframe *
 ticks	trap.c	/^uint ticks;$/;"	v	typeref:typename:uint
-ticks0	kernel.asm	/^  ticks0 = ticks;$/;"	d
+ticks0	kernel.asm	/^	ticks0 = ticks;$/;"	d
 tickslock	trap.c	/^struct spinlock tickslock;$/;"	v	typeref:struct:spinlock
 togglecode	kbd.h	/^static uchar togglecode[256] =$/;"	v	typeref:typename:uchar[256]
 tok	sh.asm	/^    tok = gettoken(ps, es, 0, 0);$/;"	d
@@ -3940,6 +4067,7 @@ uartintr	uart.c	/^uartintr(void)$/;"	f	typeref:typename:void
 uartputc	uart.c	/^uartputc(int c)$/;"	f	typeref:typename:void
 uchar	types.h	/^typedef unsigned char  uchar;$/;"	t	typeref:typename:unsigned char
 uint	cat.asm	/^uint$/;"	l
+uint	clear.asm	/^uint$/;"	l
 uint	echo.asm	/^uint$/;"	l
 uint	forktest.asm	/^uint$/;"	l
 uint	getmaxpid_test.asm	/^uint$/;"	l
@@ -4497,6 +4625,7 @@ version	mp.h	/^  uchar version;                \/\/ local APIC verison$/;"	m	str
 virt	vm.c	/^  void *virt;$/;"	m	struct:kmap	typeref:typename:void *	file:
 void	bootblock.asm	/^void$/;"	l
 void	cat.asm	/^void$/;"	l
+void	clear.asm	/^void$/;"	l
 void	echo.asm	/^void$/;"	l
 void	getmaxpid_test.asm	/^void$/;"	l
 void	getnumproc_test.asm	/^void$/;"	l
@@ -4505,6 +4634,7 @@ void	grep.asm	/^void$/;"	l
 void	hello_test.asm	/^void$/;"	l
 void	helloname_test.asm	/^void$/;"	l
 void	init.asm	/^void$/;"	l
+void	kernel.asm	/^void procpids(int *pids)$/;"	l
 void	kernel.asm	/^void$/;"	l
 void	kill.asm	/^void$/;"	l
 void	ln.asm	/^void$/;"	l
@@ -4539,6 +4669,8 @@ wrv	kernel.asm	/^  wrv = (ushort*)P2V((0x40<<4 | 0x67));  \/\/ Warm reset vector
 wsect	mkfs.c	/^wsect(uint sec, void *buf)$/;"	f	typeref:typename:void
 x	cat.asm	/^    x = -xx;$/;"	d
 x	cat.asm	/^    x = xx;$/;"	d
+x	clear.asm	/^    x = -xx;$/;"	d
+x	clear.asm	/^    x = xx;$/;"	d
 x	echo.asm	/^    x = -xx;$/;"	d
 x	echo.asm	/^    x = xx;$/;"	d
 x	getmaxpid_test.asm	/^    x = -xx;$/;"	d
@@ -4588,7 +4720,7 @@ xchg	x86.h	/^xchg(volatile uint *addr, uint newval)$/;"	f	typeref:typename:uint
 xint	mkfs.c	/^xint(uint x)$/;"	f	typeref:typename:uint
 xlength	mp.h	/^  ushort xlength;               \/\/ extended table length$/;"	m	struct:mpconf	typeref:typename:ushort
 xshort	mkfs.c	/^xshort(ushort x)$/;"	f	typeref:typename:ushort
-xticks	kernel.asm	/^  xticks = ticks;$/;"	d
+xticks	kernel.asm	/^	xticks = ticks;$/;"	d
 xv6.img	Makefile	/^xv6.img: bootblock kernel$/;"	t
 xv6.pdf	Makefile	/^xv6.pdf: $(PRINT)$/;"	t
 xv6memfs.img	Makefile	/^xv6memfs.img: bootblock kernelmemfs$/;"	t

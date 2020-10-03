@@ -12,6 +12,8 @@ int main(int argc, char **argv)
 		exit();
 	}
 	name = argv[1];
-  hello_name(name);
+  if (hello_name(name) < 0) {
+		printf(2, "hello_name error\n");
+	}
   exit();
 }

@@ -21,5 +21,9 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_hello  22
-#define SYS_hello_name	 23
+#define SYS_hello_name		23
+#define SYS_get_num_proc	24
+#define SYS_get_max_pid		25
+#define SYS_get_proc_info 26
+#define SYS_get_proc_pids 27
 
