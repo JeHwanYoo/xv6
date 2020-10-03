@@ -89,3 +89,21 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// hello
+int
+sys_hello(void) {
+	cprintf("helloxv6\n");
+	return 0;
+}
+
+// hello_name
+int
+sys_hello_name(void) {
+	char *name = 0;
+	if (argstr(0, &name) < 0) {
+		return -1;
+	}
+	cprintf("hello %s\n", name);
+	return 0;
+}
