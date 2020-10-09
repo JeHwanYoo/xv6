@@ -30,7 +30,8 @@ int get_num_proc(int *);
 int get_proc_info(int, struct processInfo *);
 int get_proc_pids(int *);
 int get_max_pid(int *);
-int setprio(int);
+int set_prio(int);
+int get_prio();
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -323,7 +323,8 @@ wait(void)
 	void
 scheduler(void)
 {
-	struct proc *p;
+	struct proc *p, *pp;
+	struct proc *max;
 	struct cpu *c = mycpu();
 	c->proc = 0;
 
@@ -334,9 +335,35 @@ scheduler(void)
 		// Loop over process table looking for process to run.
 		acquire(&ptable.lock);
 		for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+
 			if(p->state != RUNNABLE)
 				continue;
+						
+			max = p;
+			/** run the process with the highest priority **/
+			for (pp = ptable.proc; pp < &ptable.proc[NPROC]; pp++) {
+				if (pp->state != RUNNABLE)
+					continue;
+				if (max->prio < pp->prio) {
+					max = pp;
+				}
+			}
 
+			// Switch to chosen process.  It is the process's job
+			// to release ptable.lock and then reacquire it
+			// before jumping back to us.
+			c->proc = max;
+			switchuvm(max);
+			max->state = RUNNING;
+			max->cscount++;
+			swtch(&(c->scheduler), max->context);
+			switchkvm();
+
+			// Process is done running for now.
+			// It should have changed its p->state before coming back.
+			c->proc = 0;
+
+			/** run the selected process **/
 			// Switch to chosen process.  It is the process's job
 			// to release ptable.lock and then reacquire it
 			// before jumping back to us.
@@ -352,7 +379,6 @@ scheduler(void)
 			c->proc = 0;
 		}
 		release(&ptable.lock);
-
 	}
 }
 
@@ -553,7 +579,7 @@ procdump(void)
 	release(&ptable.lock);
 }
 
-int
+	int
 do_procinfo(int pid, struct processInfo *info)
 {
 	struct proc *p;
@@ -582,7 +608,7 @@ do_procinfo(int pid, struct processInfo *info)
 	return 0;
 }
 
-void 
+	void 
 do_procpids(int *pids)
 {
 	struct proc *p;

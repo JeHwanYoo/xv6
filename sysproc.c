@@ -159,11 +159,20 @@ sys_get_max_pid(void) {
 // set the priority of the current process
 // this calls 'do_set_priority()' of proc.c
 int
-sys_setprio(void) {
+sys_set_prio(void) {
 	int prio;
 	if (argint(0, &prio) < 0) {
 		return -1;
 	}
 	do_set_prio(prio);
 	return 0;
+}
+
+// SYSTEM CALL
+// @param 0 { int* } return_prio
+// set the priority of the current process
+// this calls 'do_set_priority()' of proc.c
+int
+sys_get_prio(int *return_prio) {
+	return do_get_prio();
 }
