@@ -109,10 +109,10 @@ sys_hello_name(void) {
 int
 sys_get_num_proc(void) {
 	int *num;
-	if (argptr(0, (char **)&num, sizeof(int *)) < 0) {
+	if (argptr(0, (void *)&num, sizeof(int *)) < 0) {
 		return -1;
 	}
-	*num = proccnt();
+	*num = do_proccnt();
 	return 0;
 }
 
@@ -123,10 +123,10 @@ sys_get_proc_info(void) {
 	if (argint(0, &pid) < 0) {
 		return -1;
 	}
-	if (argptr(1, (char **)&info, sizeof(info)) < 0) {
+	if (argptr(1, (void *)&info, sizeof(info)) < 0) {
 		return -1;
 	}
-	if (procinfo(pid, info) < 0) {
+	if (do_procinfo(pid, info) < 0) {
 		return -1;
 	}
 	return 0;
@@ -135,21 +135,35 @@ sys_get_proc_info(void) {
 int
 sys_get_proc_pids(void) {
 	int *pids;
-	if (argptr(0, (char **)&pids, sizeof(int *)) < 0) {
+	if (argptr(0, (void *)&pids, sizeof(int *)) < 0) {
 		return -1;
 	}
-	procpids(pids);
+	do_procpids(pids);
 	return 0;
 }
 
 int
 sys_get_max_pid(void) {
 	int *pid;
-	if (argptr(0, (char **)&pid, sizeof(int *)) < 0) {
+	if (argptr(0, (void *)&pid, sizeof(int *)) < 0) {
 		return -1;
 	}
-	if((*pid = maxpid()) < 0) {
+	if((*pid = do_maxpid()) < 0) {
 		return -1;
 	}
+	return 0;
+}
+
+// SYSTEM CALL
+// @param 0 { int } prio
+// set the priority of the current process
+// this calls 'do_set_priority()' of proc.c
+int
+sys_setprio(void) {
+	int prio;
+	if (argint(0, &prio) < 0) {
+		return -1;
+	}
+	do_set_prio(prio);
 	return 0;
 }

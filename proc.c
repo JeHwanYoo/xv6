@@ -343,9 +343,8 @@ scheduler(void)
 			c->proc = p;
 			switchuvm(p);
 			p->state = RUNNING;
-
-			swtch(&(c->scheduler), p->context);
 			p->cscount++;
+			swtch(&(c->scheduler), p->context);
 			switchkvm();
 
 			// Process is done running for now.
@@ -379,8 +378,8 @@ sched(void)
 	if(readeflags()&FL_IF)
 		panic("sched interruptible");
 	intena = mycpu()->intena;
-	swtch(&p->context, mycpu()->scheduler);
 	p->cscount++;
+	swtch(&p->context, mycpu()->scheduler);
 	mycpu()->intena = intena;
 }
 
@@ -501,7 +500,7 @@ kill(int pid)
 
 // get active processes
 	int
-proccnt(void)
+do_proccnt(void)
 {
 	int cnt = 0;
 	struct proc *p;
@@ -535,6 +534,7 @@ procdump(void)
 	char *state;
 	uint pc[10];
 
+	acquire(&ptable.lock);
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state == UNUSED)
 			continue;
@@ -550,16 +550,18 @@ procdump(void)
 		}
 		cprintf("\n");
 	}
+	release(&ptable.lock);
 }
 
-int procinfo(int pid, struct processInfo *info)
+int
+do_procinfo(int pid, struct processInfo *info)
 {
 	struct proc *p;
 
 	acquire(&ptable.lock);
 
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if (p->pid == pid) {
+		if (p->state != UNUSED && p->pid == pid) {
 			// set parent pid
 			if (p->parent->pid < 1) {
 				p->parent->pid = 0;
@@ -580,7 +582,8 @@ int procinfo(int pid, struct processInfo *info)
 	return 0;
 }
 
-void procpids(int *pids)
+void 
+do_procpids(int *pids)
 {
 	struct proc *p;
 	int i;
@@ -595,7 +598,8 @@ void procpids(int *pids)
 	release(&ptable.lock);
 }
 
-int maxpid(void) {
+int 
+do_maxpid(void) {
 	struct proc *p;
 	int pid;
 	acquire(&ptable.lock);
@@ -612,3 +616,17 @@ int maxpid(void) {
 	return pid;
 }
 
+
+int	do_get_prio()
+{
+	struct proc *p;
+	p = myproc();
+	return p->prio; // return priority
+}
+
+void do_set_prio(int n)
+{
+	struct proc *p;
+	p = myproc();
+	p->prio = n;
+}

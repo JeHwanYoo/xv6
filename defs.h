@@ -112,11 +112,7 @@ int             kill(int);
 struct cpu*     mycpu(void);
 struct proc*    myproc();
 void            pinit(void);
-int							proccnt(void); // new add
 void            procdump(void);
-int							procinfo(int, struct processInfo *); // new add
-void						procpids(int *); // new add
-int							maxpid(void); // new add
 void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
 void            setproc(struct proc*);
@@ -125,6 +121,12 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int							do_proccnt(void); // return the number of currently active processes
+int							do_procinfo(int, struct processInfo *); // find the process that matches the pid and writes the data to processInfo structure
+void						do_procpids(int *); // write the pids of all active processes to the buffer
+int							do_maxpid(void); // return the highest pid
+int							do_get_prio(); // return the priority of the current process
+void						do_set_prio(int); // set the priority of the current process
 
 // swtch.S
 void            swtch(struct context**, struct context*);
