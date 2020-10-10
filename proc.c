@@ -336,34 +336,38 @@ scheduler(void)
 		acquire(&ptable.lock);
 		for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
-			if(p->state != RUNNABLE)
-				continue;
-						
-			max = p;
-			/** run the process with the highest priority **/
-			for (pp = ptable.proc; pp < &ptable.proc[NPROC]; pp++) {
+			max = ptable.proc;
+			/** find the process with the highest priority **/
+			for (pp = ptable.proc + 1; pp < &ptable.proc[NPROC]; pp++) {
 				if (pp->state != RUNNABLE)
 					continue;
 				if (max->prio < pp->prio) {
 					max = pp;
 				}
 			}
+			
+			// if runnable max is not found, the first pointer is selected, but this proc may not be runnable.
+			if (max->state == RUNNABLE) {
+				// Switch to chosen process.  It is the process's job
+				// to release ptable.lock and then reacquire it
+				// before jumping back to us.
+				c->proc = max;
+				switchuvm(max);
+				max->state = RUNNING;
+				max->cscount++;
+				swtch(&(c->scheduler), max->context);
+				switchkvm();
 
-			// Switch to chosen process.  It is the process's job
-			// to release ptable.lock and then reacquire it
-			// before jumping back to us.
-			c->proc = max;
-			switchuvm(max);
-			max->state = RUNNING;
-			max->cscount++;
-			swtch(&(c->scheduler), max->context);
-			switchkvm();
+				// Process is done running for now.
+				// It should have changed its p->state before coming back.
+				c->proc = 0;
+			}
+			
+			// check selected proccess is runnabled
+			if (p->state != RUNNABLE)
+				continue;
 
-			// Process is done running for now.
-			// It should have changed its p->state before coming back.
-			c->proc = 0;
-
-			/** run the selected process **/
+			/** run the selected process(RR) **/
 			// Switch to chosen process.  It is the process's job
 			// to release ptable.lock and then reacquire it
 			// before jumping back to us.
@@ -560,7 +564,6 @@ procdump(void)
 	char *state;
 	uint pc[10];
 
-	acquire(&ptable.lock);
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state == UNUSED)
 			continue;
@@ -576,7 +579,6 @@ procdump(void)
 		}
 		cprintf("\n");
 	}
-	release(&ptable.lock);
 }
 
 	int
