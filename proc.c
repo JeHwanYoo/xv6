@@ -564,6 +564,7 @@ procdump(void)
 	char *state;
 	uint pc[10];
 
+	acquire(&ptable.lock);
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state == UNUSED)
 			continue;
@@ -579,6 +580,7 @@ procdump(void)
 		}
 		cprintf("\n");
 	}
+	release(&ptable.lock);
 }
 
 	int
