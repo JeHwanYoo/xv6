@@ -50,7 +50,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 	int cscount;								 // +1 when context switch (Number of Context Switch)
-	int prio;										 // scheduling priorty (MLFQ)
+	int prio;										 // scheduling priorty
 };
 
 // Process memory is laid out contiguously, low addresses first:

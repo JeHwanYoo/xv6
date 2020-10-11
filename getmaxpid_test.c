@@ -6,7 +6,7 @@
 int main(void)
 {
 	int maxpid;
-	if (get_max_pid(&maxpid) < 0) {
+	if ((maxpid = get_max_pid()) < 0) {
 		printf(2, "get_max_pid error\n");
 		exit();
 	}

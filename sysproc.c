@@ -113,18 +113,11 @@ sys_hello_name(void) {
 }
 
 // SYSTEM CALL
-// @param 0 { int* } num
-// @returns { int } success: 0, failure: -1
-// assigns the number of current processes to the first parameter
+// @returns { int } the number of current process
 // this calls 'do_proccnt()' of proc.c
 int
 sys_get_num_proc(void) {
-	int *num;
-	if (argptr(0, (void *)&num, sizeof(int *)) < 0) {
-		return -1;
-	}
-	*num = do_proccnt();
-	return 0;
+	return do_proccnt();
 }
 
 // SYSTEM CALL
@@ -165,20 +158,15 @@ sys_get_proc_pids(void) {
 }
 
 // SYSTEM CALL
-// @param 0 { int* } return_pid
-// @returns { int } success: 0, failure: -1
-// assigns the value of maxpid to the first parameter.
+// @returns { int } success: max pid, failure: -1
 // this calls 'do_maxpid()' of proc.c
 int
 sys_get_max_pid(void) {
-	int *pid;
-	if (argptr(0, (void *)&pid, sizeof(int *)) < 0) {
+	int pid;
+	if((pid = do_maxpid()) < 0) {
 		return -1;
 	}
-	if((*pid = do_maxpid()) < 0) {
-		return -1;
-	}
-	return 0;
+	return pid;
 }
 
 // SYSTEM CALL

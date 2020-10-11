@@ -6,7 +6,7 @@
 int main(void)
 {
 	int num;
-	if (get_num_proc(&num) < 0) {
+	if ((num = get_num_proc()) < 0) {
 		printf(2, "get_num_proc error\n");
 		exit();
 	} 
