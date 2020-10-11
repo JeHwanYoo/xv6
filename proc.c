@@ -528,7 +528,9 @@ kill(int pid)
 	return -1;
 }
 
-// get active processes
+/**
+ * @returns { int } the number of current process
+ **/
 	int
 do_proccnt(void)
 {
@@ -583,6 +585,12 @@ procdump(void)
 	release(&ptable.lock);
 }
 
+/**
+ *	@param { int } pid
+ *	@param { processInfo *info } info
+ *	@returns { int } success: 0, failure: -1
+ *	finds the process that matches the pid and writes the data to processInfo structure
+ **/
 	int
 do_procinfo(int pid, struct processInfo *info)
 {
@@ -612,6 +620,10 @@ do_procinfo(int pid, struct processInfo *info)
 	return 0;
 }
 
+/**
+ *	@param { int * } pids (array)
+ *	writes the pids of all processes to the array 
+ **/
 	void 
 do_procpids(int *pids)
 {
@@ -621,13 +633,16 @@ do_procpids(int *pids)
 	i = 0;
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if (p->state != UNUSED) {
-			pids[i++] = p->pid; // Set parent pid
+			pids[i++] = p->pid;
 		}
 	}
 	pids[i] = -1; // set end node
 	release(&ptable.lock);
 }
 
+/**
+ *	@returns { int } the highest pid among processes
+ **/
 int 
 do_maxpid(void) {
 	struct proc *p;
@@ -646,7 +661,9 @@ do_maxpid(void) {
 	return pid;
 }
 
-
+/**
+ *	@returns { int } priority of the current process
+ **/
 int	do_get_prio()
 {
 	struct proc *p;
@@ -654,6 +671,10 @@ int	do_get_prio()
 	return p->prio; // return priority
 }
 
+/**
+ *	@params { int } n
+ *	sets the priority of the current process
+ **/
 void do_set_prio(int n)
 {
 	struct proc *p;

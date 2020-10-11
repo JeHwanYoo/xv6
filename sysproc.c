@@ -90,12 +90,18 @@ sys_uptime(void)
 	return xticks;
 }
 
+// SYSTEM CALL
+// prints "helloxv6"
 int
 sys_hello(void) {
 	cprintf("helloxv6\n");
 	return 0;
 }
 
+// SYSTEM CALL
+// @param 0 { char * } name (string)
+// @returns { int } success: 0, failure: -1
+// prints your name
 int
 sys_hello_name(void) {
 	char *name = 0;
@@ -106,6 +112,11 @@ sys_hello_name(void) {
 	return 0;
 }
 
+// SYSTEM CALL
+// @param 0 { int* } num
+// @returns { int } success: 0, failure: -1
+// assigns the number of current processes to the first parameter
+// this calls 'do_proccnt()' of proc.c
 int
 sys_get_num_proc(void) {
 	int *num;
@@ -116,6 +127,12 @@ sys_get_num_proc(void) {
 	return 0;
 }
 
+// SYSTEM CALL
+// @param 0 { int } pid
+// @param 1 { structure processInfo * } return_info
+// @returns { int } success: 0, failure: -1
+// searches for the ptable as the first parameter and assigns it to the second parameter processInfo structure.
+// this calls 'do_procinfo()' of proc.c
 int
 sys_get_proc_info(void) {
 	int pid;
@@ -132,6 +149,11 @@ sys_get_proc_info(void) {
 	return 0;
 }
 
+// SYSTEM CALL
+// @param 0 { int* } return_pids (array)
+// @returns { int } success: 0, failure: -1
+// assigns the value of pids to the integer array
+// this calls 'do_procpids()' of proc.c
 int
 sys_get_proc_pids(void) {
 	int *pids;
@@ -142,6 +164,11 @@ sys_get_proc_pids(void) {
 	return 0;
 }
 
+// SYSTEM CALL
+// @param 0 { int* } return_pid
+// @returns { int } success: 0, failure: -1
+// assigns the value of maxpid to the first parameter.
+// this calls 'do_maxpid()' of proc.c
 int
 sys_get_max_pid(void) {
 	int *pid;
@@ -169,10 +196,10 @@ sys_set_prio(void) {
 }
 
 // SYSTEM CALL
-// @param 0 { int* } return_prio
-// set the priority of the current process
-// this calls 'do_set_priority()' of proc.c
+// @returns { int } Priority of the current process
+// get the priority of the current process
+// this calls 'do_get_priority()' of proc.c
 int
-sys_get_prio(int *return_prio) {
+sys_get_prio(void) {
 	return do_get_prio();
 }

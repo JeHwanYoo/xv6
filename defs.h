@@ -121,12 +121,12 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-int							do_proccnt(void); // return the number of currently active processes
-int							do_procinfo(int, struct processInfo *); // find the process that matches the pid and writes the data to processInfo structure
-void						do_procpids(int *); // write the pids of all active processes to the buffer
-int							do_maxpid(void); // return the highest pid
-int							do_get_prio(); // return the priority of the current process
-void						do_set_prio(int); // set the priority of the current process
+int							do_proccnt(void); // returns the number of current processes
+int							do_procinfo(int, struct processInfo *); // finds the process that matches the pid and writes the data to processInfo structure
+void						do_procpids(int *); // writes the pids of all processes to the array
+int							do_maxpid(void); // returns the highest pid among processes
+int							do_get_prio(); // returns the priority of the current process
+void						do_set_prio(int); // sets the priority of the current process
 
 // swtch.S
 void            swtch(struct context**, struct context*);
